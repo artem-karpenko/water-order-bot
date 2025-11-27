@@ -71,6 +71,23 @@ docker build -t water-order-bot .
 docker run -p 3000:3000 -e TELEGRAM_BOT_TOKEN=your_token water-order-bot
 ```
 
+### Azure Container Registry
+
+Quick deployment to Azure using the included scripts:
+
+```bash
+# Login to Azure (do this once)
+az acr login --name yozhdev
+
+# Build and push with version tag
+./build-and-push.sh v1.0.0
+
+# Or use PowerShell on Windows
+.\build-and-push.ps1 v1.0.0
+```
+
+The scripts will build the Docker image and push it to `yozhdev.azurecr.io/water-order-bot`.
+
 ### AWS Lambda
 
 The bot can be deployed to AWS Lambda using the webhook mode. The Express app handles Telegram updates via the `/telegram-webhook` endpoint.

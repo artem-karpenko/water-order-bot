@@ -57,6 +57,29 @@ docker run -p 8080:3000 -e PORT=3000 water-order-bot
 
 The Dockerfile uses a multi-stage build to create a lean production image. The build stage compiles TypeScript, and the production stage only includes runtime dependencies and compiled JavaScript.
 
+## Azure Deployment
+
+The project includes scripts for building and pushing Docker images to Azure Container Registry (yozhdev.azurecr.io).
+
+```bash
+# Login to Azure Container Registry (do this once)
+az acr login --name yozhdev
+
+# Build and push with version tag
+./build-and-push.sh v1.0.0
+
+# Or build and push as 'latest'
+./build-and-push.sh
+
+# Windows PowerShell
+.\build-and-push.ps1 v1.0.0
+```
+
+The scripts will:
+1. Build the Docker image
+2. Tag it for Azure Container Registry
+3. Push to yozhdev.azurecr.io/water-order-bot
+
 ## Architecture
 
 ### Entry Points
