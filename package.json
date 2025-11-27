@@ -1,0 +1,33 @@
+{
+  "name": "water-order-bot",
+  "version": "1.0.0",
+  "description": "",
+  "main": "dist/index.js",
+  "scripts": {
+    "dev": "nodemon --watch src --ext ts --exec ts-node src/index.ts",
+    "dev:bot": "nodemon --watch src --ext ts --exec ts-node src/bot-standalone.ts",
+    "build": "tsc",
+    "start": "node dist/index.js",
+    "start:bot": "node dist/bot-standalone.js",
+    "clean": "rm -rf dist",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "devDependencies": {
+    "@types/aws-lambda": "^8.10.157",
+    "@types/express": "^5.0.5",
+    "@types/node": "^24.10.0",
+    "nodemon": "^3.1.11",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.9.3"
+  },
+  "dependencies": {
+    "dotenv": "^17.2.3",
+    "express": "^5.1.0",
+    "serverless-http": "^4.0.0",
+    "telegraf": "^4.16.3"
+  }
+}
