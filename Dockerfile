@@ -30,11 +30,12 @@ RUN npm ci --omit=dev
 # Copy built files from builder stage
 COPY --from=builder /app/dist ./dist
 
-# Expose port
+# Expose port (for health checks if running HTTP server)
 EXPOSE 3000
 
 # Set NODE_ENV
 ENV NODE_ENV=production
 
-# Run the application
-CMD ["node", "dist/index.js"]
+# Run the bot in polling mode (default)
+# For webhook mode, override CMD with: node dist/index.js
+CMD ["node", "dist/bot-standalone.js"]

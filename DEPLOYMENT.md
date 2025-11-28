@@ -48,6 +48,29 @@ Check the deployment status:
 
 ## Method 2: Manual Deployment
 
+### Quick Deploy (One Command)
+
+Build, push, and deploy in a single command:
+
+```bash
+# Bash (Linux/Mac/Git Bash)
+./deploy.sh
+
+# With custom version
+./deploy.sh v1.0.1
+
+# PowerShell (Windows)
+.\deploy.ps1
+
+# With custom version and resource group
+.\deploy.ps1 v1.0.1 yozh
+```
+
+This script automatically:
+1. Builds the Docker image
+2. Pushes to Azure Container Registry
+3. Redeploys the container
+
 ### Prerequisites
 
 1. **Azure CLI** - Install from https://docs.microsoft.com/en-us/cli/azure/install-azure-cli
