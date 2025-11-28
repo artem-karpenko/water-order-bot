@@ -65,13 +65,24 @@ fi
 # Create new container
 echo ""
 echo "Step 3: Creating new container instance..."
+
+# Set default values for optional environment variables
+WHITELISTED_USER_IDS=${WHITELISTED_USER_IDS:-""}
+
+# Create temporary YAML with substituted values
+TEMP_YAML="azure-deploy.temp.yaml"
+sed -e "s/REGISTRY_PASSWORD_PLACEHOLDER/${AZURE_REGISTRY_PASSWORD}/g" \
+    -e "s/BOT_TOKEN_PLACEHOLDER/${TELEGRAM_BOT_TOKEN}/g" \
+    -e "s/WHITELISTED_USER_IDS_PLACEHOLDER/${WHITELISTED_USER_IDS}/g" \
+    azure-deploy.yaml > ${TEMP_YAML}
+
+echo "Running: az container create --resource-group ${RESOURCE_GROUP} --file ${TEMP_YAML}"
 az container create \
     --resource-group ${RESOURCE_GROUP} \
-    --file azure-deploy.yaml \
-    --registry-login-server ${REGISTRY} \
-    --registry-username ${REGISTRY_USERNAME} \
-    --registry-password "${AZURE_REGISTRY_PASSWORD}" \
-    --secure-environment-variables TELEGRAM_BOT_TOKEN="${TELEGRAM_BOT_TOKEN}"
+    --file ${TEMP_YAML}
+
+# Clean up temp file
+rm -f ${TEMP_YAML}
 
 if [ $? -ne 0 ]; then
     echo "❌ Failed to create container!"

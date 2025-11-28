@@ -72,11 +72,13 @@ Write-Host "Step 3: Creating new container instance..." -ForegroundColor Yellow
 
 $botToken = $env:TELEGRAM_BOT_TOKEN
 $registryPassword = $env:AZURE_REGISTRY_PASSWORD
+$whitelistedUserIds = if ($env:WHITELISTED_USER_IDS) { $env:WHITELISTED_USER_IDS } else { "" }
 
 # Create temporary YAML with substituted values
 $yamlContent = Get-Content azure-deploy.yaml -Raw
 $yamlContent = $yamlContent -replace 'REGISTRY_PASSWORD_PLACEHOLDER', $registryPassword
 $yamlContent = $yamlContent -replace 'BOT_TOKEN_PLACEHOLDER', $botToken
+$yamlContent = $yamlContent -replace 'WHITELISTED_USER_IDS_PLACEHOLDER', $whitelistedUserIds
 $tempYaml = "azure-deploy.temp.yaml"
 $yamlContent | Set-Content $tempYaml -NoNewline
 

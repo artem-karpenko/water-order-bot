@@ -18,6 +18,8 @@ properties:
         value: '3000'
       - name: TELEGRAM_BOT_TOKEN
         secureValue: BOT_TOKEN_PLACEHOLDER
+      - name: WHITELISTED_USER_IDS
+        value: WHITELISTED_USER_IDS_PLACEHOLDER
       - name: NODE_ENV
         value: 'production'
   osType: Linux
