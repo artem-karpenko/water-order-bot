@@ -5,6 +5,9 @@ A Telegram bot for ordering water delivery, built with TypeScript, Node.js, and 
 ## Features
 
 - **Telegram Bot Interface**: Users can interact with the bot through Telegram
+- **Water Delivery**: Order water delivery through the bot
+- **Email Integration**: Read latest emails from specific senders via Gmail API
+- **User Authorization**: Whitelist-based access control
 - **HTTP API**: RESTful API for programmatic access
 - **Serverless Ready**: Designed for AWS Lambda deployment
 - **Dual Bot Modes**: Supports both polling (development) and webhook (production) modes
@@ -57,10 +60,27 @@ npm run start
 
 ## Current Features
 
+### Bot Commands and Buttons
+
 When you start the bot with `/start`, it will:
 1. Display a greeting: "This bot can order water delivery for you"
-2. Show a keyboard with "Order water" button
-3. Respond to button presses with a placeholder message
+2. Show a keyboard with two buttons:
+   - **Order water**: Placeholder for water delivery ordering
+   - **Read latest email**: Fetches and displays the latest email from a configured sender
+
+### Email Reading Feature
+
+The bot can read emails from your Gmail account using the Gmail API:
+- Fetches the latest email from a specific sender (configured via `EMAIL_SENDER_FILTER`)
+- Displays the email date, sender, subject, and full body
+- Requires Gmail API setup (see [GMAIL_SETUP.md](GMAIL_SETUP.md))
+
+### User Authorization
+
+The bot uses whitelist-based authorization:
+- Only users with IDs listed in `WHITELISTED_USER_IDS` can use the bot
+- All other users receive a "User not recognized" message
+- If whitelist is empty, all users are denied access
 
 ## Deployment
 

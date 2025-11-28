@@ -68,12 +68,20 @@ echo "Step 3: Creating new container instance..."
 
 # Set default values for optional environment variables
 WHITELISTED_USER_IDS=${WHITELISTED_USER_IDS:-""}
+GMAIL_CLIENT_ID=${GMAIL_CLIENT_ID:-""}
+GMAIL_CLIENT_SECRET=${GMAIL_CLIENT_SECRET:-""}
+GMAIL_REFRESH_TOKEN=${GMAIL_REFRESH_TOKEN:-""}
+EMAIL_SENDER_FILTER=${EMAIL_SENDER_FILTER:-""}
 
 # Create temporary YAML with substituted values
 TEMP_YAML="azure-deploy.temp.yaml"
 sed -e "s/REGISTRY_PASSWORD_PLACEHOLDER/${AZURE_REGISTRY_PASSWORD}/g" \
     -e "s/BOT_TOKEN_PLACEHOLDER/${TELEGRAM_BOT_TOKEN}/g" \
     -e "s/WHITELISTED_USER_IDS_PLACEHOLDER/${WHITELISTED_USER_IDS}/g" \
+    -e "s/GMAIL_CLIENT_ID_PLACEHOLDER/${GMAIL_CLIENT_ID}/g" \
+    -e "s/GMAIL_CLIENT_SECRET_PLACEHOLDER/${GMAIL_CLIENT_SECRET}/g" \
+    -e "s/GMAIL_REFRESH_TOKEN_PLACEHOLDER/${GMAIL_REFRESH_TOKEN}/g" \
+    -e "s/EMAIL_SENDER_FILTER_PLACEHOLDER/${EMAIL_SENDER_FILTER}/g" \
     azure-deploy.yaml > ${TEMP_YAML}
 
 echo "Running: az container create --resource-group ${RESOURCE_GROUP} --file ${TEMP_YAML}"

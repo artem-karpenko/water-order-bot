@@ -73,12 +73,20 @@ Write-Host "Step 3: Creating new container instance..." -ForegroundColor Yellow
 $botToken = $env:TELEGRAM_BOT_TOKEN
 $registryPassword = $env:AZURE_REGISTRY_PASSWORD
 $whitelistedUserIds = if ($env:WHITELISTED_USER_IDS) { $env:WHITELISTED_USER_IDS } else { "" }
+$gmailClientId = if ($env:GMAIL_CLIENT_ID) { $env:GMAIL_CLIENT_ID } else { "" }
+$gmailClientSecret = if ($env:GMAIL_CLIENT_SECRET) { $env:GMAIL_CLIENT_SECRET } else { "" }
+$gmailRefreshToken = if ($env:GMAIL_REFRESH_TOKEN) { $env:GMAIL_REFRESH_TOKEN } else { "" }
+$emailSenderFilter = if ($env:EMAIL_SENDER_FILTER) { $env:EMAIL_SENDER_FILTER } else { "" }
 
 # Create temporary YAML with substituted values
 $yamlContent = Get-Content azure-deploy.yaml -Raw
 $yamlContent = $yamlContent -replace 'REGISTRY_PASSWORD_PLACEHOLDER', $registryPassword
 $yamlContent = $yamlContent -replace 'BOT_TOKEN_PLACEHOLDER', $botToken
 $yamlContent = $yamlContent -replace 'WHITELISTED_USER_IDS_PLACEHOLDER', $whitelistedUserIds
+$yamlContent = $yamlContent -replace 'GMAIL_CLIENT_ID_PLACEHOLDER', $gmailClientId
+$yamlContent = $yamlContent -replace 'GMAIL_CLIENT_SECRET_PLACEHOLDER', $gmailClientSecret
+$yamlContent = $yamlContent -replace 'GMAIL_REFRESH_TOKEN_PLACEHOLDER', $gmailRefreshToken
+$yamlContent = $yamlContent -replace 'EMAIL_SENDER_FILTER_PLACEHOLDER', $emailSenderFilter
 $tempYaml = "azure-deploy.temp.yaml"
 $yamlContent | Set-Content $tempYaml -NoNewline
 

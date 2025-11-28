@@ -60,7 +60,8 @@ bot.command('start', async (ctx) => {
   console.log('='.repeat(50));
 
   const keyboard = Markup.keyboard([
-    [Markup.button.text('Order water')]
+    [Markup.button.text('Order water')],
+    [Markup.button.text('Read latest email')]
   ]).resize();
 
   await ctx.reply(
@@ -80,6 +81,49 @@ bot.hears('Order water', async (ctx) => {
   console.log('='.repeat(50));
 
   await ctx.reply('This command will allow you to order delivery');
+});
+
+// Handle "Read latest email" button
+bot.hears('Read latest email', async (ctx) => {
+  const user = ctx.from;
+  console.log('='.repeat(50));
+  console.log('User interaction: Read latest email button');
+  console.log(`User ID: ${user?.id}`);
+  console.log(`Username: @${user?.username || 'N/A'}`);
+  console.log(`Name: ${user?.first_name} ${user?.last_name || ''}`);
+  console.log('='.repeat(50));
+
+  try {
+    const { GmailService } = await import('./services/gmailService');
+    const senderEmail = process.env.EMAIL_SENDER_FILTER;
+
+    if (!senderEmail) {
+      await ctx.reply('Error: EMAIL_SENDER_FILTER not configured');
+      return;
+    }
+
+    await ctx.reply('Fetching latest email...');
+
+    const gmailService = new GmailService();
+    const email = await gmailService.getLatestEmailFromSender(senderEmail);
+
+    if (!email) {
+      await ctx.reply(`No emails found from ${senderEmail}`);
+      return;
+    }
+
+    // Format the email message
+    const formattedMessage = `📧 *Latest Email*\n\n` +
+      `📅 *Date:* ${email.date}\n` +
+      `👤 *From:* ${email.sender}\n` +
+      `📝 *Subject:* ${email.subject}\n\n` +
+      `*Body:*\n${email.body}`;
+
+    await ctx.reply(formattedMessage, { parse_mode: 'Markdown' });
+  } catch (error) {
+    console.error('Error reading email:', error);
+    await ctx.reply('Failed to fetch email. Please check the logs for details.');
+  }
 });
 
 export default bot;

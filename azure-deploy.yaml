@@ -20,6 +20,14 @@ properties:
         secureValue: BOT_TOKEN_PLACEHOLDER
       - name: WHITELISTED_USER_IDS
         value: WHITELISTED_USER_IDS_PLACEHOLDER
+      - name: GMAIL_CLIENT_ID
+        secureValue: GMAIL_CLIENT_ID_PLACEHOLDER
+      - name: GMAIL_CLIENT_SECRET
+        secureValue: GMAIL_CLIENT_SECRET_PLACEHOLDER
+      - name: GMAIL_REFRESH_TOKEN
+        secureValue: GMAIL_REFRESH_TOKEN_PLACEHOLDER
+      - name: EMAIL_SENDER_FILTER
+        value: EMAIL_SENDER_FILTER_PLACEHOLDER
       - name: NODE_ENV
         value: 'production'
   osType: Linux
