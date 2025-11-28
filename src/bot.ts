@@ -112,12 +112,18 @@ bot.hears('Read latest email', async (ctx) => {
       return;
     }
 
+    // Limit body to 100 characters
+    const MAX_BODY_LENGTH = 100;
+    const truncatedBody = email.body.length > MAX_BODY_LENGTH
+      ? email.body.substring(0, MAX_BODY_LENGTH) + '...'
+      : email.body;
+
     // Format the email message
     const formattedMessage = `📧 *Latest Email*\n\n` +
       `📅 *Date:* ${email.date}\n` +
       `👤 *From:* ${email.sender}\n` +
       `📝 *Subject:* ${email.subject}\n\n` +
-      `*Body:*\n${email.body}`;
+      `*Body:*\n${truncatedBody}`;
 
     await ctx.reply(formattedMessage, { parse_mode: 'Markdown' });
   } catch (error) {
