@@ -1,0 +1,38 @@
+apiVersion: '2021-09-01'
+location: northeurope
+name: water-order-bot
+properties:
+  containers:
+  - name: water-order-bot
+    properties:
+      image: yozhdev.azurecr.io/water-order-bot:latest
+      resources:
+        requests:
+          cpu: 1
+          memoryInGb: 1.5
+      ports:
+      - port: 3000
+        protocol: TCP
+      environmentVariables:
+      - name: PORT
+        value: '3000'
+      - name: TELEGRAM_BOT_TOKEN
+        secureValue: BOT_TOKEN_PLACEHOLDER
+      - name: NODE_ENV
+        value: 'production'
+  osType: Linux
+  restartPolicy: Always
+  ipAddress:
+    type: Public
+    ports:
+    - protocol: TCP
+      port: 3000
+    dnsNameLabel: water-order-bot
+  imageRegistryCredentials:
+  - server: yozhdev.azurecr.io
+    username: yozhdev
+    password: REGISTRY_PASSWORD_PLACEHOLDER
+tags:
+  environment: production
+  app: water-order-bot
+type: Microsoft.ContainerInstance/containerGroups

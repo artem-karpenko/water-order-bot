@@ -1,8 +1,54 @@
 # Azure Deployment Guide
 
-This guide explains how to deploy the Water Order Bot to Azure using the included build scripts.
+This guide explains how to deploy the Water Order Bot to Azure. There are two deployment methods:
 
-## Prerequisites
+1. **Automated Deployment** (Recommended) - GitHub Actions CI/CD pipeline
+2. **Manual Deployment** - Local build and push scripts
+
+## Method 1: Automated Deployment with GitHub Actions
+
+### One-Time Setup
+
+1. **Configure GitHub Secrets** - See [GITHUB_SECRETS.md](GITHUB_SECRETS.md) for detailed instructions
+
+   Required secrets:
+   - `AZURE_REGISTRY_USERNAME`
+   - `AZURE_REGISTRY_PASSWORD`
+   - `AZURE_CREDENTIALS`
+   - `AZURE_RESOURCE_GROUP`
+
+2. **Update azure-deploy.yaml** - Set your TELEGRAM_BOT_TOKEN
+
+### Deploy
+
+Once configured, deployment happens automatically:
+
+```bash
+# Deploy by pushing to main
+git push origin main
+
+# Or create a version tag
+git tag v1.0.0
+git push origin v1.0.0
+
+# Or manually trigger from GitHub Actions UI
+```
+
+The workflow will:
+1. Build the Docker image
+2. Push to Azure Container Registry
+3. Deploy to Azure Container Instances
+4. Output the deployment URL
+
+### Monitor Deployment
+
+Check the deployment status:
+- GitHub Actions tab in your repository
+- View logs and deployment details
+
+## Method 2: Manual Deployment
+
+### Prerequisites
 
 1. **Azure CLI** - Install from https://docs.microsoft.com/en-us/cli/azure/install-azure-cli
 2. **Docker Desktop** - Make sure it's running
@@ -63,7 +109,19 @@ Use semantic versioning for your releases:
 
 ## Deploying to Azure Container Instances
 
-Once your image is pushed, you can deploy it:
+### Option A: Using YAML Configuration (Recommended)
+
+The repository includes `azure-deploy.yaml` with pre-configured settings:
+
+```bash
+# Update azure-deploy.yaml with your TELEGRAM_BOT_TOKEN first
+# Then deploy:
+az container create \
+  --resource-group your-resource-group \
+  --file azure-deploy.yaml
+```
+
+### Option B: Using CLI Command
 
 ```bash
 # Create a container instance
@@ -77,6 +135,46 @@ az container create \
   --dns-name-label water-order-bot \
   --ports 3000 \
   --environment-variables TELEGRAM_BOT_TOKEN=your_token_here PORT=3000
+```
+
+## Redeploying an Existing Container
+
+To update a running container with a new image or configuration, use the redeploy scripts:
+
+### Using Bash (Linux/Mac/Git Bash)
+
+```bash
+# Delete old container and create new one
+./azure-redeploy.sh your-resource-group
+```
+
+### Using PowerShell (Windows)
+
+```powershell
+# Delete old container and create new one
+.\azure-redeploy.ps1 your-resource-group
+```
+
+The scripts will:
+1. Check if the container exists
+2. Delete the existing container (if found)
+3. Wait for cleanup
+4. Create a new container using `azure-deploy.yaml`
+5. Display container details and status
+
+### Manual Redeployment
+
+```bash
+# Delete existing container
+az container delete \
+  --name water-order-bot \
+  --resource-group your-resource-group \
+  --yes
+
+# Create new container
+az container create \
+  --resource-group your-resource-group \
+  --file azure-deploy.yaml
 ```
 
 ## Deploying to Azure App Service

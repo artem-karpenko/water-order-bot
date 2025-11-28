@@ -71,9 +71,21 @@ docker build -t water-order-bot .
 docker run -p 3000:3000 -e TELEGRAM_BOT_TOKEN=your_token water-order-bot
 ```
 
-### Azure Container Registry
+### Azure
 
-Quick deployment to Azure using the included scripts:
+**Automated Deployment (Recommended)**
+
+GitHub Actions workflow automatically builds and deploys on push:
+
+```bash
+# Configure GitHub Secrets (see GITHUB_SECRETS.md)
+# Then just push to trigger deployment
+git push origin main
+```
+
+**Manual Deployment**
+
+Quick build and push using included scripts:
 
 ```bash
 # Login to Azure (do this once)
@@ -84,9 +96,12 @@ az acr login --name yozhdev
 
 # Or use PowerShell on Windows
 .\build-and-push.ps1 v1.0.0
+
+# Deploy using YAML config
+az container create --resource-group your-rg --file azure-deploy.yaml
 ```
 
-The scripts will build the Docker image and push it to `yozhdev.azurecr.io/water-order-bot`.
+See [DEPLOYMENT.md](DEPLOYMENT.md) for complete deployment instructions.
 
 ### AWS Lambda
 
