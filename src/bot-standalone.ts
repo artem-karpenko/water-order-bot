@@ -7,8 +7,10 @@ if (process.env.NODE_ENV !== 'production') {
 
 import bot from './bot';
 import app from './app';
+import { ReplyMonitorService } from './services/replyMonitor';
 
 const PORT = process.env.PORT || 3000;
+const REPLY_CHECK_INTERVAL = parseInt(process.env.REPLY_CHECK_INTERVAL_MINUTES || '2');
 
 console.log('Starting Water Order Bot with HTTP server...');
 console.log(`Environment: ${process.env.NODE_ENV || 'development'}`);
@@ -22,6 +24,9 @@ const server = app.listen(PORT, () => {
   console.log('='.repeat(50));
 });
 
+// Initialize reply monitor
+const replyMonitor = new ReplyMonitorService(bot);
+
 // Start bot in polling mode
 bot.launch()
   .then(() => {
@@ -30,6 +35,9 @@ bot.launch()
     console.log('✓ Mode: Polling');
     console.log('✓ Waiting for messages...');
     console.log('='.repeat(50));
+
+    // Start reply monitoring
+    replyMonitor.start(REPLY_CHECK_INTERVAL);
   })
   .catch((error) => {
     console.error('✗ Failed to start bot:', error);
@@ -39,11 +47,13 @@ bot.launch()
 // Enable graceful stop
 process.once('SIGINT', () => {
   console.log('Shutting down gracefully...');
+  replyMonitor.stop();
   bot.stop('SIGINT');
   server.close();
 });
 process.once('SIGTERM', () => {
   console.log('Shutting down gracefully...');
+  replyMonitor.stop();
   bot.stop('SIGTERM');
   server.close();
 });

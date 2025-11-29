@@ -186,10 +186,22 @@ bot.action('confirm_order', async (ctx) => {
     console.log(`Subject: ${emailSubject}`);
     console.log(`Body: ${emailBody}`);
     const gmailService = new GmailService();
-    await gmailService.sendEmail(recipientEmail, emailSubject, emailBody);
+    const emailMessageId = await gmailService.sendEmail(recipientEmail, emailSubject, emailBody);
+
+    // Track this order for reply monitoring
+    const { orderTracker } = await import('./services/orderTracker');
+    const trackingId = orderTracker.addPendingOrder({
+      chatId: ctx.chat!.id,
+      userId: ctx.from!.id,
+      messageId: ctx.callbackQuery!.message!.message_id,
+      emailSentTo: recipientEmail,
+      emailSubject: emailSubject,
+      sentAt: new Date(),
+      emailMessageId: emailMessageId
+    });
 
     // Update message to confirm success
-    await ctx.editMessageText('✅ Email sent! Your water delivery order has been submitted.');
+    await ctx.editMessageText('✅ Email sent! Your water delivery order has been submitted.\n\n💡 I\'ll notify you when you receive a reply.');
     await ctx.answerCbQuery('Email sent successfully');
   } catch (error) {
     console.error('Error sending order email:', error);
