@@ -6,7 +6,12 @@
       "Bash(git add:*)",
       "Bash(git commit:*)",
       "Bash(chmod:*)",
-      "Bash(git push:*)"
+      "Bash(git push:*)",
+      "Bash(npm run build)",
+      "Bash(git checkout:*)",
+      "Bash(git merge:*)",
+      "Bash(__NEW_LINE__ Your water delivery order sent X hours ago has not been answered yet.)",
+      "Bash(__NEW_LINE__ I 'll keep checking and notify you when a reply arrives.\"\n\nTechnical Changes:\n- Added lastReminderAt field to PendingOrder interface\n- Added updateLastReminder() method to OrderTrackerService\n- Removed clearOldOrders() method entirely\n- Added checkAndSendReminder() method to ReplyMonitorService\n- Calculates hours since order and hours since last reminder\n- Only sends reminder if 24h+ have passed since last reminder/order\n\n🤖 Generated with [Claude Code](https://claude.com/claude-code)\n\nCo-Authored-By: Claude <noreply@anthropic.com>\nEOF\n)\")"
     ],
     "deny": [],
     "ask": []

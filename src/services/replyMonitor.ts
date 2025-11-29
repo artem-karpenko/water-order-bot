@@ -90,15 +90,15 @@ export class ReplyMonitorService {
 
             // Mark order as completed
             orderTracker.completePendingOrder(trackingId);
+          } else {
+            // No reply yet - check if we should send a reminder
+            await this.checkAndSendReminder(trackingId, order);
           }
         } catch (error) {
           console.error(`Error checking order ${trackingId}:`, error);
           // Continue checking other orders
         }
       }
-
-      // Clean up old orders (older than 24 hours)
-      orderTracker.clearOldOrders(24);
 
     } catch (error) {
       console.error('Error in reply monitor:', error);
@@ -127,6 +127,35 @@ export class ReplyMonitorService {
     } catch (error) {
       console.error(`Error sending notification to chat ${chatId}:`, error);
       throw error;
+    }
+  }
+
+  /**
+   * Check if reminder should be sent and send it
+   */
+  private async checkAndSendReminder(trackingId: string, order: any): Promise<void> {
+    const now = new Date();
+    const hoursSinceOrder = (now.getTime() - order.sentAt.getTime()) / (1000 * 60 * 60);
+
+    // Determine the time reference for reminder check
+    const lastReferenceTime = order.lastReminderAt || order.sentAt;
+    const hoursSinceLastReminder = (now.getTime() - lastReferenceTime.getTime()) / (1000 * 60 * 60);
+
+    // Send reminder if 24 hours have passed since last reminder (or since order was sent)
+    if (hoursSinceLastReminder >= 24) {
+      try {
+        const message = `⏰ *No answer yet*\n\n` +
+          `Your water delivery order sent ${Math.floor(hoursSinceOrder)} hours ago has not been answered yet.\n\n` +
+          `I'll keep checking and notify you when a reply arrives.`;
+
+        await this.bot.telegram.sendMessage(order.chatId, message, { parse_mode: 'Markdown' });
+        console.log(`⏰ Reminder sent for order ${trackingId} (${Math.floor(hoursSinceOrder)}h old)`);
+
+        // Update last reminder time
+        orderTracker.updateLastReminder(trackingId);
+      } catch (error) {
+        console.error(`Error sending reminder for order ${trackingId}:`, error);
+      }
     }
   }
 

@@ -11,6 +11,7 @@ interface PendingOrder {
   emailSubject: string;
   sentAt: Date;
   emailMessageId?: string; // Gmail message ID for tracking replies
+  lastReminderAt?: Date; // Last time "No answer yet" reminder was sent
 }
 
 class OrderTrackerService {
@@ -64,21 +65,13 @@ class OrderTrackerService {
   }
 
   /**
-   * Clear old pending orders (older than specified hours)
+   * Update the last reminder time for an order
    */
-  clearOldOrders(hoursOld: number = 24): void {
-    const cutoffTime = new Date(Date.now() - hoursOld * 60 * 60 * 1000);
-    let cleared = 0;
-
-    for (const [trackingId, order] of this.pendingOrders.entries()) {
-      if (order.sentAt < cutoffTime) {
-        this.pendingOrders.delete(trackingId);
-        cleared++;
-      }
-    }
-
-    if (cleared > 0) {
-      console.log(`🧹 Cleared ${cleared} old pending orders (older than ${hoursOld}h)`);
+  updateLastReminder(trackingId: string): void {
+    const order = this.pendingOrders.get(trackingId);
+    if (order) {
+      order.lastReminderAt = new Date();
+      console.log(`🔔 Updated reminder time for order: ${trackingId}`);
     }
   }
 }
