@@ -12,6 +12,9 @@ const WHITELISTED_USER_IDS = process.env.WHITELISTED_USER_IDS
   : [];
 
 console.log(`Whitelisted user IDs: ${WHITELISTED_USER_IDS.join(', ') || 'None (all users DENIED)'}`);
+console.log(`Email sender filter: ${process.env.EMAIL_SENDER_FILTER || 'NOT CONFIGURED'}`);
+console.log(`Email order subject: ${process.env.EMAIL_ORDER_SUBJECT || 'Water Delivery Order (default)'}`);
+console.log(`Email order body: ${process.env.EMAIL_ORDER_BODY || 'Please deliver water. (default)'}`);
 
 const bot = new Telegraf(BOT_TOKEN);
 
@@ -111,6 +114,7 @@ bot.hears('Read latest email', async (ctx) => {
       return;
     }
 
+    console.log(`Querying emails from: ${senderEmail}`);
     await ctx.reply('Fetching latest email...');
 
     const gmailService = new GmailService();
@@ -178,6 +182,9 @@ bot.action('confirm_order', async (ctx) => {
     await ctx.editMessageText('Sending email...');
 
     // Send the email
+    console.log(`Sending email to: ${recipientEmail}`);
+    console.log(`Subject: ${emailSubject}`);
+    console.log(`Body: ${emailBody}`);
     const gmailService = new GmailService();
     await gmailService.sendEmail(recipientEmail, emailSubject, emailBody);
 
