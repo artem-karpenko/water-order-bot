@@ -1,5 +1,5 @@
 import { Telegraf, Markup, Context } from 'telegraf';
-import { orderTracker } from './services/orderTracker';
+import { orderTracker } from './services/azureTableOrderTracker';
 
 const BOT_TOKEN = process.env.TELEGRAM_BOT_TOKEN;
 
@@ -190,7 +190,7 @@ bot.action('confirm_order', async (ctx) => {
     const emailMessageId = await gmailService.sendEmail(recipientEmail, emailSubject, emailBody);
 
     // Track this order for reply monitoring
-    const trackingId = orderTracker.addPendingOrder({
+    const trackingId = await orderTracker.addPendingOrder({
       chatId: ctx.chat!.id,
       userId: ctx.from!.id,
       messageId: ctx.callbackQuery!.message!.message_id,

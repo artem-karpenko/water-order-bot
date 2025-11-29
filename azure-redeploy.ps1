@@ -79,6 +79,7 @@ $gmailRefreshToken = if ($env:GMAIL_REFRESH_TOKEN) { $env:GMAIL_REFRESH_TOKEN } 
 $emailSenderFilter = if ($env:EMAIL_SENDER_FILTER) { $env:EMAIL_SENDER_FILTER } else { "" }
 $emailOrderSubject = if ($env:EMAIL_ORDER_SUBJECT) { $env:EMAIL_ORDER_SUBJECT } else { "Water Delivery Order" }
 $emailOrderBody = if ($env:EMAIL_ORDER_BODY) { $env:EMAIL_ORDER_BODY } else { "Please deliver water." }
+$azureStorageConnectionString = if ($env:AZURE_STORAGE_CONNECTION_STRING) { $env:AZURE_STORAGE_CONNECTION_STRING } else { "" }
 
 # Create temporary YAML with substituted values
 $yamlContent = Get-Content azure-deploy.yaml -Raw
@@ -91,6 +92,7 @@ $yamlContent = $yamlContent -replace 'GMAIL_REFRESH_TOKEN_PLACEHOLDER', $gmailRe
 $yamlContent = $yamlContent -replace 'EMAIL_SENDER_FILTER_PLACEHOLDER', $emailSenderFilter
 $yamlContent = $yamlContent -replace 'EMAIL_ORDER_SUBJECT_PLACEHOLDER', $emailOrderSubject
 $yamlContent = $yamlContent -replace 'EMAIL_ORDER_BODY_PLACEHOLDER', $emailOrderBody
+$yamlContent = $yamlContent -replace 'AZURE_STORAGE_CONNECTION_STRING_PLACEHOLDER', $azureStorageConnectionString
 $tempYaml = "azure-deploy.temp.yaml"
 $yamlContent | Set-Content $tempYaml -NoNewline
 

@@ -5,7 +5,7 @@
 
 import { Telegraf } from 'telegraf';
 import { GmailService } from './gmailService';
-import { orderTracker } from './orderTracker';
+import { orderTracker } from './azureTableOrderTracker';
 
 export class ReplyMonitorService {
   private intervalId: NodeJS.Timeout | null = null;
@@ -62,8 +62,8 @@ export class ReplyMonitorService {
     this.isChecking = true;
 
     try {
-      const pendingOrders = orderTracker.getPendingOrders();
-      const pendingCount = orderTracker.getPendingCount();
+      const pendingOrders = await orderTracker.getPendingOrders();
+      const pendingCount = await orderTracker.getPendingCount();
 
       console.log(`📊 Reply monitor check - found ${pendingCount} pending orders`);
 
@@ -91,7 +91,7 @@ export class ReplyMonitorService {
             await this.sendReplyNotification(order.chatId, reply.body);
 
             // Mark order as completed
-            orderTracker.completePendingOrder(trackingId);
+            await orderTracker.completePendingOrder(trackingId);
           } else {
             // No reply yet - check if we should send a reminder
             await this.checkAndSendReminder(trackingId, order);
@@ -154,7 +154,7 @@ export class ReplyMonitorService {
         console.log(`⏰ Reminder sent for order ${trackingId} (${Math.floor(hoursSinceOrder)}h old)`);
 
         // Update last reminder time
-        orderTracker.updateLastReminder(trackingId);
+        await orderTracker.updateLastReminder(trackingId);
       } catch (error) {
         console.error(`Error sending reminder for order ${trackingId}:`, error);
       }
@@ -164,11 +164,11 @@ export class ReplyMonitorService {
   /**
    * Get monitor status
    */
-  getStatus(): { running: boolean; checking: boolean; pendingOrders: number } {
+  async getStatus(): Promise<{ running: boolean; checking: boolean; pendingOrders: number }> {
     return {
       running: this.intervalId !== null,
       checking: this.isChecking,
-      pendingOrders: orderTracker.getPendingCount()
+      pendingOrders: await orderTracker.getPendingCount()
     };
   }
 }

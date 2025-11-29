@@ -32,6 +32,8 @@ properties:
         value: EMAIL_ORDER_SUBJECT_PLACEHOLDER
       - name: EMAIL_ORDER_BODY
         value: EMAIL_ORDER_BODY_PLACEHOLDER
+      - name: AZURE_STORAGE_CONNECTION_STRING
+        secureValue: AZURE_STORAGE_CONNECTION_STRING_PLACEHOLDER
       - name: NODE_ENV
         value: 'production'
   osType: Linux

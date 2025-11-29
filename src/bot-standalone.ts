@@ -28,8 +28,7 @@ const server = app.listen(PORT, () => {
 const replyMonitor = new ReplyMonitorService(bot);
 
 // Start bot in polling mode
-bot.launch()
-  .then(() => {
+bot.launch(() => {
     console.log('='.repeat(50));
     console.log('✓ Telegram bot started successfully');
     console.log('✓ Mode: Polling');
