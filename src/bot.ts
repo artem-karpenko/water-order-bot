@@ -1,4 +1,5 @@
 import { Telegraf, Markup, Context } from 'telegraf';
+import { orderTracker } from './services/orderTracker';
 
 const BOT_TOKEN = process.env.TELEGRAM_BOT_TOKEN;
 
@@ -189,7 +190,6 @@ bot.action('confirm_order', async (ctx) => {
     const emailMessageId = await gmailService.sendEmail(recipientEmail, emailSubject, emailBody);
 
     // Track this order for reply monitoring
-    const { orderTracker } = await import('./services/orderTracker');
     const trackingId = orderTracker.addPendingOrder({
       chatId: ctx.chat!.id,
       userId: ctx.from!.id,
