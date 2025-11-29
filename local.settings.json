@@ -1,0 +1,17 @@
+{
+  "IsEncrypted": false,
+  "Values": {
+    "AzureWebJobsStorage": "UseDevelopmentStorage=true",
+    "FUNCTIONS_WORKER_RUNTIME": "node",
+    "TELEGRAM_BOT_TOKEN": "",
+    "WHITELISTED_USER_IDS": "",
+    "GMAIL_CLIENT_ID": "",
+    "GMAIL_CLIENT_SECRET": "",
+    "GMAIL_REFRESH_TOKEN": "",
+    "EMAIL_SENDER_FILTER": "",
+    "EMAIL_ORDER_SUBJECT": "Water Delivery Order",
+    "EMAIL_ORDER_BODY": "Please deliver water.",
+    "AZURE_STORAGE_CONNECTION_STRING": "",
+    "NODE_ENV": "development"
+  }
+}
