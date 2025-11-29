@@ -162,8 +162,33 @@ bot.action('confirm_order', async (ctx) => {
   console.log(`User ID: ${ctx.from?.id}`);
   console.log('='.repeat(50));
 
-  // Just acknowledge for now (will implement email sending later)
-  await ctx.answerCbQuery('Email sending will be implemented');
+  try {
+    const { GmailService } = await import('./services/gmailService');
+    const recipientEmail = process.env.EMAIL_SENDER_FILTER;
+    const emailSubject = process.env.EMAIL_ORDER_SUBJECT || 'Water Delivery Order';
+    const emailBody = process.env.EMAIL_ORDER_BODY || 'Please deliver water.';
+
+    if (!recipientEmail) {
+      await ctx.answerCbQuery('Error: EMAIL_SENDER_FILTER not configured');
+      await ctx.editMessageText('Error: Email recipient not configured');
+      return;
+    }
+
+    // Update message to show sending status
+    await ctx.editMessageText('Sending email...');
+
+    // Send the email
+    const gmailService = new GmailService();
+    await gmailService.sendEmail(recipientEmail, emailSubject, emailBody);
+
+    // Update message to confirm success
+    await ctx.editMessageText('✅ Email sent! Your water delivery order has been submitted.');
+    await ctx.answerCbQuery('Email sent successfully');
+  } catch (error) {
+    console.error('Error sending order email:', error);
+    await ctx.editMessageText('❌ Failed to send email. Please try again or contact support.');
+    await ctx.answerCbQuery('Failed to send email');
+  }
 });
 
 export default bot;

@@ -12,8 +12,11 @@ const oauth2Client = new google.auth.OAuth2(
   REDIRECT_URI
 );
 
-// Request readonly access to Gmail
-const SCOPES = ['https://www.googleapis.com/auth/gmail.readonly'];
+// Request read and send access to Gmail
+const SCOPES = [
+  'https://www.googleapis.com/auth/gmail.readonly',
+  'https://www.googleapis.com/auth/gmail.send'
+];
 
 const authUrl = oauth2Client.generateAuthUrl({
   access_type: 'offline',

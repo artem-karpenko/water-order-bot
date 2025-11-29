@@ -77,6 +77,8 @@ $gmailClientId = if ($env:GMAIL_CLIENT_ID) { $env:GMAIL_CLIENT_ID } else { "" }
 $gmailClientSecret = if ($env:GMAIL_CLIENT_SECRET) { $env:GMAIL_CLIENT_SECRET } else { "" }
 $gmailRefreshToken = if ($env:GMAIL_REFRESH_TOKEN) { $env:GMAIL_REFRESH_TOKEN } else { "" }
 $emailSenderFilter = if ($env:EMAIL_SENDER_FILTER) { $env:EMAIL_SENDER_FILTER } else { "" }
+$emailOrderSubject = if ($env:EMAIL_ORDER_SUBJECT) { $env:EMAIL_ORDER_SUBJECT } else { "Water Delivery Order" }
+$emailOrderBody = if ($env:EMAIL_ORDER_BODY) { $env:EMAIL_ORDER_BODY } else { "Please deliver water." }
 
 # Create temporary YAML with substituted values
 $yamlContent = Get-Content azure-deploy.yaml -Raw
@@ -87,6 +89,8 @@ $yamlContent = $yamlContent -replace 'GMAIL_CLIENT_ID_PLACEHOLDER', $gmailClient
 $yamlContent = $yamlContent -replace 'GMAIL_CLIENT_SECRET_PLACEHOLDER', $gmailClientSecret
 $yamlContent = $yamlContent -replace 'GMAIL_REFRESH_TOKEN_PLACEHOLDER', $gmailRefreshToken
 $yamlContent = $yamlContent -replace 'EMAIL_SENDER_FILTER_PLACEHOLDER', $emailSenderFilter
+$yamlContent = $yamlContent -replace 'EMAIL_ORDER_SUBJECT_PLACEHOLDER', $emailOrderSubject
+$yamlContent = $yamlContent -replace 'EMAIL_ORDER_BODY_PLACEHOLDER', $emailOrderBody
 $tempYaml = "azure-deploy.temp.yaml"
 $yamlContent | Set-Content $tempYaml -NoNewline
 

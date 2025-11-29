@@ -108,4 +108,40 @@ export class GmailService {
 
     return body || 'No content';
   }
+
+  /**
+   * Send an email
+   */
+  async sendEmail(to: string, subject: string, body: string): Promise<void> {
+    try {
+      // Create email in RFC 2822 format
+      const email = [
+        `To: ${to}`,
+        `Subject: ${subject}`,
+        'Content-Type: text/plain; charset=utf-8',
+        '',
+        body
+      ].join('\n');
+
+      // Encode in base64url format
+      const encodedEmail = Buffer.from(email)
+        .toString('base64')
+        .replace(/\+/g, '-')
+        .replace(/\//g, '_')
+        .replace(/=+$/, '');
+
+      // Send the email
+      await this.gmail.users.messages.send({
+        userId: 'me',
+        requestBody: {
+          raw: encodedEmail,
+        },
+      });
+
+      console.log(`Email sent successfully to ${to}`);
+    } catch (error) {
+      console.error('Error sending email:', error);
+      throw error;
+    }
+  }
 }

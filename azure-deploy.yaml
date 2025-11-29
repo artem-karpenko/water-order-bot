@@ -28,6 +28,10 @@ properties:
         secureValue: GMAIL_REFRESH_TOKEN_PLACEHOLDER
       - name: EMAIL_SENDER_FILTER
         value: EMAIL_SENDER_FILTER_PLACEHOLDER
+      - name: EMAIL_ORDER_SUBJECT
+        value: EMAIL_ORDER_SUBJECT_PLACEHOLDER
+      - name: EMAIL_ORDER_BODY
+        value: EMAIL_ORDER_BODY_PLACEHOLDER
       - name: NODE_ENV
         value: 'production'
   osType: Linux

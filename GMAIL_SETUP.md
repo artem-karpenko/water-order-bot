@@ -1,6 +1,6 @@
 # Gmail API Setup Guide
 
-This guide explains how to set up Gmail API credentials for the email reading feature.
+This guide explains how to set up Gmail API credentials for reading and sending emails.
 
 ## Prerequisites
 
@@ -58,7 +58,10 @@ const oauth2Client = new google.auth.OAuth2(
   REDIRECT_URI
 );
 
-const SCOPES = ['https://www.googleapis.com/auth/gmail.readonly'];
+const SCOPES = [
+  'https://www.googleapis.com/auth/gmail.readonly',
+  'https://www.googleapis.com/auth/gmail.send'
+];
 
 const authUrl = oauth2Client.generateAuthUrl({
   access_type: 'offline',
@@ -97,7 +100,9 @@ Follow the instructions to get your refresh token.
 2. Click the gear icon (⚙️) in the top right
 3. Check "Use your own OAuth credentials"
 4. Enter your Client ID and Client Secret
-5. In "Step 1", scroll to "Gmail API v1" and select `https://www.googleapis.com/auth/gmail.readonly`
+5. In "Step 1", scroll to "Gmail API v1" and select both:
+   - `https://www.googleapis.com/auth/gmail.readonly`
+   - `https://www.googleapis.com/auth/gmail.send`
 6. Click "Authorize APIs"
 7. Sign in with your Google account and grant permissions
 8. In "Step 2", click "Exchange authorization code for tokens"
