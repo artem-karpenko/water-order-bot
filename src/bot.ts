@@ -148,11 +148,11 @@ bot.action('cancel_order', async (ctx) => {
   console.log(`User ID: ${ctx.from?.id}`);
   console.log('='.repeat(50));
 
-  // Delete the message with inline keyboard
-  await ctx.deleteMessage();
+  // Edit the message and remove inline keyboard
+  await ctx.editMessageText('Delivery not confirmed');
 
-  // Show notification
-  await ctx.answerCbQuery('Delivery not confirmed');
+  // Acknowledge the callback query
+  await ctx.answerCbQuery();
 });
 
 // Handle "Yes, send email" inline button
