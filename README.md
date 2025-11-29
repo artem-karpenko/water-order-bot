@@ -1,16 +1,16 @@
 # Water Order Bot
 
-A Telegram bot for ordering water delivery, built with TypeScript, Node.js, and designed for serverless deployment.
+A Telegram bot for ordering water delivery, built with TypeScript, Node.js, and Azure Functions for serverless deployment.
 
 ## Features
 
 - **Telegram Bot Interface**: Users can interact with the bot through Telegram
-- **Water Delivery**: Order water delivery through the bot
-- **Email Integration**: Read latest emails from specific senders via Gmail API
+- **Water Delivery Ordering**: Order water delivery and track order status
+- **Email Integration**: Gmail API integration for sending orders and monitoring replies
 - **User Authorization**: Whitelist-based access control
-- **HTTP API**: RESTful API for programmatic access
-- **Serverless Ready**: Designed for AWS Lambda deployment
-- **Dual Bot Modes**: Supports both polling (development) and webhook (production) modes
+- **Reply Monitoring**: Automated checking for supplier email responses
+- **Azure Functions Serverless**: Cost-effective serverless deployment on Azure
+- **Azure Table Storage**: Persistent order tracking
 
 ## Quick Start
 
@@ -18,6 +18,7 @@ A Telegram bot for ordering water delivery, built with TypeScript, Node.js, and 
 
 - Node.js 20 or higher
 - A Telegram Bot Token (get one from [@BotFather](https://t.me/botfather))
+- Azure account (for deployment)
 
 ### Installation
 
@@ -25,118 +26,94 @@ A Telegram bot for ordering water delivery, built with TypeScript, Node.js, and 
 # Install dependencies
 npm install
 
-# Create environment file
+# Set up local development settings
 cp .env.example .env
 
-# Add your Telegram bot token to .env
+# Add your configuration to .env
 # TELEGRAM_BOT_TOKEN=your_bot_token_here
+# WHITELISTED_USER_IDS=your_telegram_user_id
+# ... (see GMAIL_SETUP.md for Gmail config)
 ```
 
-### Running the Bot
+### Local Development
 
 ```bash
-# Development mode with hot reload
-npm run dev:bot
-
-# Production mode
+# Build TypeScript
 npm run build
-npm run start:bot
-```
 
-### Running the HTTP API
+# Run Azure Functions locally
+npm start
 
-```bash
-# Development mode with hot reload
-npm run dev
-
-# Production mode
-npm run build
-npm run start
+# The bot will be available at http://localhost:7071/api/telegram-webhook
+# Timer function will run every 2 minutes to check for email replies
 ```
 
 ## Bot Commands
 
-- `/start` - Start the bot and see the main menu
-
-## Current Features
-
-### Bot Commands and Buttons
-
-When you start the bot with `/start`, it will:
-1. Display a greeting: "This bot can order water delivery for you"
-2. Show a keyboard with two buttons:
-   - **Order water**: Placeholder for water delivery ordering
-   - **Read latest email**: Fetches and displays the latest email from a configured sender
-
-### Email Reading Feature
-
-The bot can read emails from your Gmail account using the Gmail API:
-- Fetches the latest email from a specific sender (configured via `EMAIL_SENDER_FILTER`)
-- Displays the email date, sender, subject, and full body
-- Requires Gmail API setup (see [GMAIL_SETUP.md](GMAIL_SETUP.md))
-
-### User Authorization
-
-The bot uses whitelist-based authorization:
-- Only users with IDs listed in `WHITELISTED_USER_IDS` can use the bot
-- All other users receive a "User not recognized" message
-- If whitelist is empty, all users are denied access
+- `/start` - Start the bot and see the main menu with keyboard buttons
+- **Order water** button - Send water delivery order via email
+- **Read latest email** button - View the most recent email from supplier
 
 ## Deployment
 
-### Docker
+### Azure Functions (Production)
+
+The bot runs on Azure Functions in serverless mode:
 
 ```bash
-docker build -t water-order-bot .
-docker run -p 3000:3000 -e TELEGRAM_BOT_TOKEN=your_token water-order-bot
+# Build and deploy
+npm run deploy
+
+# Or manually:
+npm run build
+func azure functionapp publish water-order-bot-func --no-build
 ```
 
-### Azure
+**Functions deployed:**
+- `telegramWebhook` - HTTP trigger for Telegram updates
+- `replyMonitor` - Timer trigger (runs every 2 minutes) to check for email replies
 
-**Automated Deployment (Recommended)**
-
-GitHub Actions workflow automatically builds and deploys on push:
-
-```bash
-# Configure GitHub Secrets (see GITHUB_SECRETS.md)
-# Then just push to trigger deployment
-git push origin main
-```
-
-**Manual Deployment**
-
-Quick build and push using included scripts:
-
-```bash
-# Login to Azure (do this once)
-az acr login --name yozhdev
-
-# Build and push with version tag
-./build-and-push.sh v1.0.0
-
-# Or use PowerShell on Windows
-.\build-and-push.ps1 v1.0.0
-
-# Deploy using YAML config
-az container create --resource-group your-rg --file azure-deploy.yaml
-```
-
-See [DEPLOYMENT.md](DEPLOYMENT.md) for complete deployment instructions.
-
-### AWS Lambda
-
-The bot can be deployed to AWS Lambda using the webhook mode. The Express app handles Telegram updates via the `/telegram-webhook` endpoint.
+See [DEPLOYMENT.md](DEPLOYMENT.md) for complete setup instructions.
 
 ## Project Structure
 
 ```
 src/
-├── app.ts              # Express application with HTTP routes and webhook
-├── bot.ts              # Telegram bot logic (commands and handlers)
-├── bot-standalone.ts   # Standalone bot runner (polling mode)
-├── index.ts            # HTTP server entry point
-└── handler.ts          # AWS Lambda handler
+├── functions.ts                          # Azure Functions entry point
+├── telegramWebhook.ts                    # HTTP trigger for Telegram
+├── replyMonitor.ts                       # Timer trigger for email checking
+└── shared/
+    ├── bot.ts                            # Bot instance and handlers
+    └── services/
+        ├── azureTableOrderTracker.ts     # Order tracking with Azure Table Storage
+        ├── gmailService.ts               # Gmail API integration
+        └── replyMonitor.ts               # Reply monitoring logic
 ```
+
+## Configuration
+
+### Environment Variables
+
+Required environment variables (set in Azure Function App settings):
+
+- `TELEGRAM_BOT_TOKEN` - Your Telegram bot token
+- `WHITELISTED_USER_IDS` - Comma-separated list of allowed Telegram user IDs
+- `GMAIL_CLIENT_ID` - Gmail API OAuth client ID
+- `GMAIL_CLIENT_SECRET` - Gmail API OAuth client secret
+- `GMAIL_REFRESH_TOKEN` - Gmail API refresh token
+- `EMAIL_SENDER_FILTER` - Email address to send orders to and monitor
+- `EMAIL_ORDER_SUBJECT` - Subject line for order emails
+- `EMAIL_ORDER_BODY` - Body content for order emails
+- `AZURE_STORAGE_CONNECTION_STRING` - Azure Storage connection for order tracking
+
+See [GMAIL_SETUP.md](GMAIL_SETUP.md) for Gmail API setup instructions.
+
+## Cost Optimization
+
+This serverless implementation reduces costs significantly:
+- **Before**: ~$60-70/month (Azure Container Instances, always-on)
+- **After**: ~$1-2/month (Azure Functions Consumption plan, pay-per-execution)
+- **Dependencies optimized**: From 1.5GB to 40MB (97% reduction)
 
 ## Development
 

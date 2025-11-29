@@ -110,32 +110,73 @@ Follow the instructions to get your refresh token.
 
 ## Step 5: Configure Environment Variables
 
-Add the following to your `.env` file:
+### For Local Development
 
-```bash
-GMAIL_CLIENT_ID=your_client_id_here
-GMAIL_CLIENT_SECRET=your_client_secret_here
-GMAIL_REFRESH_TOKEN=your_refresh_token_here
-EMAIL_SENDER_FILTER=sender@example.com
+Add the following to your `local.settings.json` file:
+
+```json
+{
+  "IsEncrypted": false,
+  "Values": {
+    "AzureWebJobsStorage": "UseDevelopmentStorage=true",
+    "FUNCTIONS_WORKER_RUNTIME": "node",
+    "GMAIL_CLIENT_ID": "your_client_id_here",
+    "GMAIL_CLIENT_SECRET": "your_client_secret_here",
+    "GMAIL_REFRESH_TOKEN": "your_refresh_token_here",
+    "EMAIL_SENDER_FILTER": "sender@example.com",
+    "EMAIL_ORDER_SUBJECT": "Water Order",
+    "EMAIL_ORDER_BODY": "Please deliver water",
+    "TELEGRAM_BOT_TOKEN": "your_telegram_bot_token",
+    "WHITELISTED_USER_IDS": "your_telegram_user_id",
+    "AZURE_STORAGE_CONNECTION_STRING": "your_storage_connection_string"
+  }
+}
 ```
 
 Replace:
 - `your_client_id_here` with your OAuth Client ID
 - `your_client_secret_here` with your OAuth Client Secret
 - `your_refresh_token_here` with the refresh token you generated
-- `sender@example.com` with the email address you want to filter emails from
+- `sender@example.com` with the email address you want to send orders to and monitor
+
+### For Azure Production
+
+Set the environment variables in Azure Function App:
+
+```bash
+az functionapp config appsettings set \
+  --name water-order-bot-func \
+  --resource-group yozh \
+  --settings \
+    GMAIL_CLIENT_ID=your_client_id \
+    GMAIL_CLIENT_SECRET=your_client_secret \
+    GMAIL_REFRESH_TOKEN=your_refresh_token \
+    EMAIL_SENDER_FILTER=sender@example.com \
+    EMAIL_ORDER_SUBJECT="Water Order" \
+    EMAIL_ORDER_BODY="Please deliver water"
+```
+
+See [DEPLOYMENT.md](DEPLOYMENT.md) for complete Azure deployment instructions.
 
 ## Step 6: Test the Feature
 
-1. Build and run the bot:
+1. Build and run the bot locally:
    ```bash
+   npm install
    npm run build
-   npm run start:bot
+   npm start
    ```
 
-2. In Telegram, send `/start` to your bot
-3. Click the "Read latest email" button
-4. The bot should fetch and display the latest email from the configured sender
+2. Set your Telegram bot webhook to the local endpoint (using ngrok):
+   ```bash
+   ngrok http 7071
+   curl -X POST "https://api.telegram.org/bot<YOUR_TOKEN>/setWebhook" \
+     -d "url=https://your-ngrok-url.ngrok.io/api/telegram-webhook"
+   ```
+
+3. In Telegram, send `/start` to your bot
+4. Click the "Read latest email" button
+5. The bot should fetch and display the latest email from the configured sender
 
 ## Troubleshooting
 
