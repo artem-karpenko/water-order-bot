@@ -13,6 +13,6 @@
     "moduleResolution": "node",
     "sourceMap": true
   },
-  "include": ["src/**/*"],
+  "include": ["src/shared/**/*", "src/functions.ts", "src/telegramWebhook.ts", "src/replyMonitor.ts"],
   "exclude": ["node_modules", "dist"]
 }

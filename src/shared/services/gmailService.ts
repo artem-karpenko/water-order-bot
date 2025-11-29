@@ -1,4 +1,4 @@
-import { google } from 'googleapis';
+import { gmail_v1 } from '@googleapis/gmail';
 import { OAuth2Client } from 'google-auth-library';
 
 interface EmailData {
@@ -10,7 +10,7 @@ interface EmailData {
 
 export class GmailService {
   private oauth2Client: OAuth2Client;
-  private gmail;
+  private gmail: gmail_v1.Gmail;
 
   constructor() {
     const clientId = process.env.GMAIL_CLIENT_ID;
@@ -21,7 +21,7 @@ export class GmailService {
       throw new Error('Gmail credentials not configured. Please set GMAIL_CLIENT_ID, GMAIL_CLIENT_SECRET, and GMAIL_REFRESH_TOKEN');
     }
 
-    this.oauth2Client = new google.auth.OAuth2(
+    this.oauth2Client = new OAuth2Client(
       clientId,
       clientSecret,
       'urn:ietf:wg:oauth:2.0:oob' // For installed apps
@@ -31,7 +31,7 @@ export class GmailService {
       refresh_token: refreshToken,
     });
 
-    this.gmail = google.gmail({ version: 'v1', auth: this.oauth2Client });
+    this.gmail = new gmail_v1.Gmail({ auth: this.oauth2Client });
   }
 
   /**
