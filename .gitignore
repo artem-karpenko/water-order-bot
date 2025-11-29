@@ -5,3 +5,8 @@ dist/
 .DS_Store
 .serverless/
 azure-deploy.temp.yaml
+
+# Deployment artifacts
+deploy*.zip
+azure-settings.json
+*.temp.yaml

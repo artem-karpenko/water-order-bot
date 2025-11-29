@@ -4,29 +4,20 @@
   "description": "Water Order Bot - Azure Functions Serverless",
   "main": "dist/functions.js",
   "scripts": {
-    "dev": "nodemon --watch src --ext ts --exec ts-node src/index.ts",
-    "dev:bot": "nodemon --watch src --ext ts --exec ts-node src/bot-standalone.ts",
     "build": "tsc",
     "watch": "tsc --watch",
-    "start": "node dist/functions.js",
-    "start:legacy": "node dist/index.js",
-    "start:bot": "node dist/bot-standalone.js",
+    "start": "func start",
+    "deploy": "npm run build && func azure functionapp publish water-order-bot-func --no-build",
     "clean": "rm -rf dist",
-    "test": "echo \"Error: no test specified\" && exit 1",
-    "prestart": "npm run build"
+    "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "type": "commonjs",
   "devDependencies": {
-    "@types/aws-lambda": "^8.10.157",
-    "@types/express": "^5.0.5",
     "@types/node": "^24.10.0",
     "azure-functions-core-tools": "^4.0.5611",
-    "nodemon": "^3.1.11",
-    "rimraf": "^6.0.1",
-    "ts-node": "^10.9.2",
     "typescript": "^5.9.3"
   },
   "dependencies": {
