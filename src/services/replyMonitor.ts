@@ -65,6 +65,8 @@ export class ReplyMonitorService {
       const pendingOrders = orderTracker.getPendingOrders();
       const pendingCount = orderTracker.getPendingCount();
 
+      console.log(`📊 Reply monitor check - found ${pendingCount} pending orders`);
+
       if (pendingCount === 0) {
         console.log('📭 No pending orders to check');
         this.isChecking = false;

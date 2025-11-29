@@ -28,6 +28,7 @@ class OrderTrackerService {
     console.log(`📝 Tracking new order: ${trackingId}`);
     console.log(`   Chat: ${order.chatId}, User: ${order.userId}`);
     console.log(`   Sent to: ${order.emailSentTo}`);
+    console.log(`   📊 Total pending orders after add: ${this.pendingOrders.size}`);
 
     return trackingId;
   }
