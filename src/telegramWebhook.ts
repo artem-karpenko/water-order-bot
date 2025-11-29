@@ -4,12 +4,33 @@ import bot from './shared/bot';
 /**
  * Azure Function: Telegram Webhook Handler
  * Receives updates from Telegram via webhook and processes them with the bot instance
+ *
+ * Security: Validates X-Telegram-Bot-Api-Secret-Token header to ensure requests come from Telegram
  */
 export async function telegramWebhook(
   request: HttpRequest,
   context: InvocationContext
 ): Promise<HttpResponseInit> {
   try {
+    // Security: Verify Telegram secret token
+    const expectedSecret = process.env.TELEGRAM_SECRET_TOKEN;
+    const receivedSecret = request.headers.get('X-Telegram-Bot-Api-Secret-Token');
+
+    if (!expectedSecret) {
+      context.error('TELEGRAM_SECRET_TOKEN not configured - webhook is INSECURE!');
+      // Allow requests if not configured (backward compatibility during migration)
+      // TODO: Make this mandatory after initial deployment
+    } else if (receivedSecret !== expectedSecret) {
+      context.warn('Unauthorized webhook request - invalid or missing secret token');
+      context.warn(`Received from IP: ${request.headers.get('X-Forwarded-For') || 'unknown'}`);
+      return {
+        status: 403,
+        body: 'Forbidden'
+      };
+    } else {
+      context.log('✓ Webhook request authenticated successfully');
+    }
+
     const update = await request.json() as any;
     context.log('Received Telegram update:', JSON.stringify(update, null, 2));
 
