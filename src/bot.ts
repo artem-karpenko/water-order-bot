@@ -80,7 +80,16 @@ bot.hears('Order water', async (ctx) => {
   console.log(`Name: ${user?.first_name} ${user?.last_name || ''}`);
   console.log('='.repeat(50));
 
-  await ctx.reply('This command will allow you to order delivery');
+  // Show message with inline keyboard
+  await ctx.reply(
+    'Do you want to order water now?',
+    Markup.inlineKeyboard([
+      [
+        Markup.button.callback('Yes, send email', 'confirm_order'),
+        Markup.button.callback('Cancel', 'cancel_order')
+      ]
+    ])
+  );
 });
 
 // Handle "Read latest email" button
@@ -130,6 +139,31 @@ bot.hears('Read latest email', async (ctx) => {
     console.error('Error reading email:', error);
     await ctx.reply('Failed to fetch email. Please check the logs for details.');
   }
+});
+
+// Handle "Cancel" inline button
+bot.action('cancel_order', async (ctx) => {
+  console.log('='.repeat(50));
+  console.log('User interaction: Cancel order button');
+  console.log(`User ID: ${ctx.from?.id}`);
+  console.log('='.repeat(50));
+
+  // Delete the message with inline keyboard
+  await ctx.deleteMessage();
+
+  // Show notification
+  await ctx.answerCbQuery('Delivery not confirmed');
+});
+
+// Handle "Yes, send email" inline button
+bot.action('confirm_order', async (ctx) => {
+  console.log('='.repeat(50));
+  console.log('User interaction: Confirm order button');
+  console.log(`User ID: ${ctx.from?.id}`);
+  console.log('='.repeat(50));
+
+  // Just acknowledge for now (will implement email sending later)
+  await ctx.answerCbQuery('Email sending will be implemented');
 });
 
 export default bot;
