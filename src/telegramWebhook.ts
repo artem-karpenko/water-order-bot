@@ -1,5 +1,5 @@
 import { app, HttpRequest, HttpResponseInit, InvocationContext } from "@azure/functions";
-import bot from '../shared/bot';
+import bot from './shared/bot';
 
 /**
  * Azure Function: Telegram Webhook Handler

@@ -1,7 +1,7 @@
 import { app, InvocationContext, Timer } from "@azure/functions";
 import { Telegraf } from 'telegraf';
-import { GmailService } from '../shared/services/gmailService';
-import { orderTracker } from '../shared/services/azureTableOrderTracker';
+import { GmailService } from './shared/services/gmailService';
+import { orderTracker } from './shared/services/azureTableOrderTracker';
 
 const BOT_TOKEN = process.env.TELEGRAM_BOT_TOKEN;
 if (!BOT_TOKEN) {
