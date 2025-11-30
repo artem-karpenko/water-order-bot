@@ -3,6 +3,9 @@
   "version": "2.0.0",
   "description": "Water Order Bot - Azure Functions Serverless",
   "main": "dist/functions.js",
+  "engines": {
+    "node": ">=24.0.0"
+  },
   "scripts": {
     "build": "tsc",
     "watch": "tsc --watch",
