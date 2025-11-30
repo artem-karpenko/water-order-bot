@@ -8,6 +8,8 @@
     "watch": "tsc --watch",
     "start": "func start",
     "deploy": "npm run build && func azure functionapp publish water-order-bot-func --no-build",
+    "deploy:prod": "npm run build && rm -rf node_modules && npm install --omit=dev && func azure functionapp publish water-order-bot-func --no-build && npm install",
+    "publish-settings": "func azure functionapp publish water-order-bot-func --publish-local-settings",
     "clean": "rm -rf dist",
     "test": "echo \"Error: no test specified\" && exit 1"
   },

@@ -6,6 +6,9 @@ dist/
 .serverless/
 azure-deploy.temp.yaml
 
+# Azure Functions local settings (contains secrets)
+local.settings.json
+
 # Deployment artifacts
 deploy*.zip
 azure-settings.json
