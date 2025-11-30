@@ -148,8 +148,27 @@ export class GmailService {
   }
 
   /**
+   * Archive an email by removing the INBOX label
+   */
+  async archiveEmail(messageId: string): Promise<void> {
+    try {
+      await this.gmail.users.messages.modify({
+        userId: 'me',
+        id: messageId,
+        requestBody: {
+          removeLabelIds: ['INBOX'],
+        },
+      });
+      console.log(`Email archived successfully (ID: ${messageId})`);
+    } catch (error) {
+      console.error('Error archiving email:', error);
+      throw error;
+    }
+  }
+
+  /**
    * Check for replies to emails with a specific subject
-   * Returns the latest reply if found
+   * Returns the latest reply if found and archives it
    */
   async checkForReply(senderEmail: string, subjectContains: string, afterDate: Date): Promise<EmailData | null> {
     try {
@@ -184,6 +203,10 @@ export class GmailService {
 
       // Extract body
       const body = this.extractBody(message.data.payload);
+
+      // Archive the email after reading it
+      console.log(`Archiving reply email (ID: ${messageId})`);
+      await this.archiveEmail(messageId);
 
       return {
         date: dateHeader,
