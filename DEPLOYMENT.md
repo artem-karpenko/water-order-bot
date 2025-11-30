@@ -17,6 +17,19 @@ This serverless architecture costs ~$1-2/month compared to ~$60-70/month with Co
 3. **Node.js 20 or higher**
 4. **Azure Account** with active subscription
 
+### PowerShell Users - Important Note
+
+If you're using PowerShell, Azure CLI commands with special characters (like `|` in runtime versions) require the stop-parsing token `--%`:
+
+```powershell
+# PowerShell: Use --% to prevent character escaping
+az --% functionapp config set --name water-order-bot-func --resource-group yozh --linux-fx-version "NODE|20"
+
+# Without --%  this will fail with "'20' is not recognized as an internal or external command"
+```
+
+The `--%` tells PowerShell to stop interpreting special characters and pass everything as-is to the Azure CLI.
+
 ## First-Time Setup
 
 ### 1. Login to Azure
