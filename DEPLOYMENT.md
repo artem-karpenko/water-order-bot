@@ -14,7 +14,7 @@ This serverless architecture costs ~$1-2/month compared to ~$60-70/month with Co
 
 1. **Azure CLI** - Install from https://docs.microsoft.com/en-us/cli/azure/install-azure-cli
 2. **Azure Functions Core Tools** - Install from https://learn.microsoft.com/azure/azure-functions/functions-run-local
-3. **Node.js 20 or higher**
+3. **Node.js 22 or higher**
 4. **Azure Account** with active subscription
 
 ### PowerShell Users - Important Note
@@ -23,9 +23,9 @@ If you're using PowerShell, Azure CLI commands with special characters (like `|`
 
 ```powershell
 # PowerShell: Use --% to prevent character escaping
-az --% functionapp config set --name water-order-bot-func --resource-group yozh --linux-fx-version "NODE|20"
+az --% functionapp config set --name water-order-bot-func --resource-group yozh --linux-fx-version "NODE|22"
 
-# Without --%  this will fail with "'20' is not recognized as an internal or external command"
+# Without --%  this will fail with "'22' is not recognized as an internal or external command"
 ```
 
 The `--%` tells PowerShell to stop interpreting special characters and pass everything as-is to the Azure CLI.
@@ -63,7 +63,7 @@ az functionapp create \
   --resource-group water-order-bot-rg \
   --consumption-plan-location eastus \
   --runtime node \
-  --runtime-version 20 \
+  --runtime-version 22 \
   --functions-version 4 \
   --name water-order-bot-func \
   --storage-account waterorderbotstore

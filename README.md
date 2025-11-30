@@ -16,7 +16,7 @@ A Telegram bot for ordering water delivery, built with TypeScript, Node.js, and 
 
 ### Prerequisites
 
-- Node.js 20 or higher
+- Node.js 22 or higher
 - A Telegram Bot Token (get one from [@BotFather](https://t.me/botfather))
 - Azure account (for deployment)
 
