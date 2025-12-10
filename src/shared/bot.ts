@@ -1,5 +1,6 @@
 import { Telegraf, Markup } from 'telegraf';
 import { orderTracker } from './services/azureTableOrderTracker';
+import { Logger, consoleLogger } from './utils/logger';
 
 const BOT_TOKEN = process.env.TELEGRAM_BOT_TOKEN;
 
@@ -12,10 +13,17 @@ const WHITELISTED_USER_IDS = process.env.WHITELISTED_USER_IDS
   ? process.env.WHITELISTED_USER_IDS.split(',').map(id => parseInt(id.trim()))
   : [];
 
-console.log(`Whitelisted user IDs: ${WHITELISTED_USER_IDS.join(', ') || 'None (all users DENIED)'}`);
-console.log(`Email sender filter: ${process.env.EMAIL_SENDER_FILTER || 'NOT CONFIGURED'}`);
-console.log(`Email order subject: ${process.env.EMAIL_ORDER_SUBJECT || 'Water Delivery Order (default)'}`);
-console.log(`Email order body: ${process.env.EMAIL_ORDER_BODY || 'Please deliver water. (default)'}`);
+// Logger that can be injected from Azure Functions context
+let currentLogger: Logger = consoleLogger;
+
+export function setLogger(logger: Logger) {
+  currentLogger = logger;
+}
+
+currentLogger.log(`Whitelisted user IDs: ${WHITELISTED_USER_IDS.join(', ') || 'None (all users DENIED)'}`);
+currentLogger.log(`Email sender filter: ${process.env.EMAIL_SENDER_FILTER || 'NOT CONFIGURED'}`);
+currentLogger.log(`Email order subject: ${process.env.EMAIL_ORDER_SUBJECT || 'Water Delivery Order (default)'}`);
+currentLogger.log(`Email order body: ${process.env.EMAIL_ORDER_BODY || 'Please deliver water. (default)'}`);
 
 const bot = new Telegraf(BOT_TOKEN);
 
@@ -25,29 +33,29 @@ bot.use(async (ctx, next) => {
 
   // If no whitelist configured, reject all users
   if (WHITELISTED_USER_IDS.length === 0) {
-    console.log('='.repeat(50));
-    console.log('⚠️  Access denied - No whitelist configured');
-    console.log(`User ID: ${userId}`);
-    console.log(`Username: @${ctx.from?.username || 'N/A'}`);
-    console.log(`Name: ${ctx.from?.first_name} ${ctx.from?.last_name || ''}`);
-    console.log('='.repeat(50));
+    currentLogger.log('='.repeat(50));
+    currentLogger.log('⚠️  Access denied - No whitelist configured');
+    currentLogger.log(`User ID: ${userId}`);
+    currentLogger.log(`Username: @${ctx.from?.username || 'N/A'}`);
+    currentLogger.log(`Name: ${ctx.from?.first_name} ${ctx.from?.last_name || ''}`);
+    currentLogger.log('='.repeat(50));
     await ctx.reply('User not recognized');
     return;
   }
 
   // Check if user is whitelisted
   if (userId && WHITELISTED_USER_IDS.includes(userId)) {
-    console.log(`✓ Authorized user: ${userId}`);
+    currentLogger.log(`✓ Authorized user: ${userId}`);
     return next();
   }
 
   // Log unauthorized access attempt
-  console.log('='.repeat(50));
-  console.log('⚠️  Unauthorized access attempt');
-  console.log(`User ID: ${userId}`);
-  console.log(`Username: @${ctx.from?.username || 'N/A'}`);
-  console.log(`Name: ${ctx.from?.first_name} ${ctx.from?.last_name || ''}`);
-  console.log('='.repeat(50));
+  currentLogger.log('='.repeat(50));
+  currentLogger.log('⚠️  Unauthorized access attempt');
+  currentLogger.log(`User ID: ${userId}`);
+  currentLogger.log(`Username: @${ctx.from?.username || 'N/A'}`);
+  currentLogger.log(`Name: ${ctx.from?.first_name} ${ctx.from?.last_name || ''}`);
+  currentLogger.log('='.repeat(50));
 
   // Respond to unauthorized user
   await ctx.reply('User not recognized');
@@ -56,12 +64,12 @@ bot.use(async (ctx, next) => {
 // Handle /start command
 bot.command('start', async (ctx) => {
   const user = ctx.from;
-  console.log('='.repeat(50));
-  console.log('User interaction: /start command');
-  console.log(`User ID: ${user?.id}`);
-  console.log(`Username: @${user?.username || 'N/A'}`);
-  console.log(`Name: ${user?.first_name} ${user?.last_name || ''}`);
-  console.log('='.repeat(50));
+  currentLogger.log('='.repeat(50));
+  currentLogger.log('User interaction: /start command');
+  currentLogger.log(`User ID: ${user?.id}`);
+  currentLogger.log(`Username: @${user?.username || 'N/A'}`);
+  currentLogger.log(`Name: ${user?.first_name} ${user?.last_name || ''}`);
+  currentLogger.log('='.repeat(50));
 
   const keyboard = Markup.keyboard([
     [Markup.button.text('Order water')],
@@ -77,12 +85,12 @@ bot.command('start', async (ctx) => {
 // Handle "Order water" button
 bot.hears('Order water', async (ctx) => {
   const user = ctx.from;
-  console.log('='.repeat(50));
-  console.log('User interaction: Order water button');
-  console.log(`User ID: ${user?.id}`);
-  console.log(`Username: @${user?.username || 'N/A'}`);
-  console.log(`Name: ${user?.first_name} ${user?.last_name || ''}`);
-  console.log('='.repeat(50));
+  currentLogger.log('='.repeat(50));
+  currentLogger.log('User interaction: Order water button');
+  currentLogger.log(`User ID: ${user?.id}`);
+  currentLogger.log(`Username: @${user?.username || 'N/A'}`);
+  currentLogger.log(`Name: ${user?.first_name} ${user?.last_name || ''}`);
+  currentLogger.log('='.repeat(50));
 
   // Show message with inline keyboard
   await ctx.reply(
@@ -99,12 +107,12 @@ bot.hears('Order water', async (ctx) => {
 // Handle "Read latest email" button
 bot.hears('Read latest email', async (ctx) => {
   const user = ctx.from;
-  console.log('='.repeat(50));
-  console.log('User interaction: Read latest email button');
-  console.log(`User ID: ${user?.id}`);
-  console.log(`Username: @${user?.username || 'N/A'}`);
-  console.log(`Name: ${user?.first_name} ${user?.last_name || ''}`);
-  console.log('='.repeat(50));
+  currentLogger.log('='.repeat(50));
+  currentLogger.log('User interaction: Read latest email button');
+  currentLogger.log(`User ID: ${user?.id}`);
+  currentLogger.log(`Username: @${user?.username || 'N/A'}`);
+  currentLogger.log(`Name: ${user?.first_name} ${user?.last_name || ''}`);
+  currentLogger.log('='.repeat(50));
 
   try {
     const { GmailService } = await import('./services/gmailService');
@@ -115,7 +123,7 @@ bot.hears('Read latest email', async (ctx) => {
       return;
     }
 
-    console.log(`Querying emails from: ${senderEmail}`);
+    currentLogger.log(`Querying emails from: ${senderEmail}`);
     await ctx.reply('Fetching latest email...');
 
     const gmailService = new GmailService();
@@ -141,17 +149,17 @@ bot.hears('Read latest email', async (ctx) => {
 
     await ctx.reply(formattedMessage, { parse_mode: 'Markdown' });
   } catch (error) {
-    console.error('Error reading email:', error);
+    currentLogger.error('Error reading email:', error);
     await ctx.reply('Failed to fetch email. Please check the logs for details.');
   }
 });
 
 // Handle "Cancel" inline button
 bot.action('cancel_order', async (ctx) => {
-  console.log('='.repeat(50));
-  console.log('User interaction: Cancel order button');
-  console.log(`User ID: ${ctx.from?.id}`);
-  console.log('='.repeat(50));
+  currentLogger.log('='.repeat(50));
+  currentLogger.log('User interaction: Cancel order button');
+  currentLogger.log(`User ID: ${ctx.from?.id}`);
+  currentLogger.log('='.repeat(50));
 
   // Edit the message and remove inline keyboard
   await ctx.editMessageText('Delivery not confirmed');
@@ -162,10 +170,10 @@ bot.action('cancel_order', async (ctx) => {
 
 // Handle "Yes, send email" inline button
 bot.action('confirm_order', async (ctx) => {
-  console.log('='.repeat(50));
-  console.log('User interaction: Confirm order button');
-  console.log(`User ID: ${ctx.from?.id}`);
-  console.log('='.repeat(50));
+  currentLogger.log('='.repeat(50));
+  currentLogger.log('User interaction: Confirm order button');
+  currentLogger.log(`User ID: ${ctx.from?.id}`);
+  currentLogger.log('='.repeat(50));
 
   try {
     const { GmailService } = await import('./services/gmailService');
@@ -183,9 +191,9 @@ bot.action('confirm_order', async (ctx) => {
     await ctx.editMessageText('Sending email...');
 
     // Send the email
-    console.log(`Sending email to: ${recipientEmail}`);
-    console.log(`Subject: ${emailSubject}`);
-    console.log(`Body: ${emailBody}`);
+    currentLogger.log(`Sending email to: ${recipientEmail}`);
+    currentLogger.log(`Subject: ${emailSubject}`);
+    currentLogger.log(`Body: ${emailBody}`);
     const gmailService = new GmailService();
     const emailMessageId = await gmailService.sendEmail(recipientEmail, emailSubject, emailBody);
 
@@ -204,7 +212,7 @@ bot.action('confirm_order', async (ctx) => {
     await ctx.editMessageText('✅ Email sent! Your water delivery order has been submitted.\n\n💡 I\'ll notify you when you receive a reply.');
     await ctx.answerCbQuery('Email sent successfully');
   } catch (error) {
-    console.error('Error sending order email:', error);
+    currentLogger.error('Error sending order email:', error);
     await ctx.editMessageText('❌ Failed to send email. Please try again or contact support.');
     await ctx.answerCbQuery('Failed to send email');
   }

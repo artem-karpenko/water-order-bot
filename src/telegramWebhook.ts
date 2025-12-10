@@ -1,5 +1,6 @@
 import { app, HttpRequest, HttpResponseInit, InvocationContext } from "@azure/functions";
-import bot from './shared/bot';
+import bot, { setLogger } from './shared/bot';
+import { contextLogger } from './shared/utils/logger';
 
 /**
  * Azure Function: Telegram Webhook Handler
@@ -11,6 +12,9 @@ export async function telegramWebhook(
   request: HttpRequest,
   context: InvocationContext
 ): Promise<HttpResponseInit> {
+  // Inject Azure Functions context logger into bot handlers
+  setLogger(contextLogger(context));
+
   try {
     // Security: Verify Telegram secret token
     const expectedSecret = process.env.TELEGRAM_SECRET_TOKEN;

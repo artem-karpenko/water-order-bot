@@ -4,6 +4,7 @@
  */
 
 import { TableClient, TableEntity } from '@azure/data-tables';
+import { Logger, consoleLogger } from '../utils/logger';
 
 interface PendingOrder {
   chatId: number;
@@ -31,8 +32,10 @@ class AzureTableOrderTrackerService {
   private tableClient: TableClient | null = null;
   private tableName = 'PendingOrders';
   private initializationPromise: Promise<void> | null = null;
+  private logger: Logger;
 
-  constructor() {
+  constructor(logger: Logger = consoleLogger) {
+    this.logger = logger;
     // Lazy initialization - connect when first operation is called
   }
 
@@ -52,8 +55,8 @@ class AzureTableOrderTrackerService {
       const connectionString = process.env.AZURE_STORAGE_CONNECTION_STRING;
 
       if (!connectionString) {
-        console.error('⚠️  AZURE_STORAGE_CONNECTION_STRING not configured - order persistence disabled');
-        console.error('   Orders will not persist across restarts!');
+        this.logger.error('⚠️  AZURE_STORAGE_CONNECTION_STRING not configured - order persistence disabled');
+        this.logger.error('   Orders will not persist across restarts!');
         return;
       }
 
@@ -65,13 +68,13 @@ class AzureTableOrderTrackerService {
 
         // Create table if it doesn't exist
         await this.tableClient.createTable();
-        console.log(`✓ Connected to Azure Table Storage: ${this.tableName}`);
+        this.logger.log(`✓ Connected to Azure Table Storage: ${this.tableName}`);
       } catch (error: any) {
         if (error?.statusCode === 409) {
           // Table already exists - this is fine
-          console.log(`✓ Using existing Azure Table: ${this.tableName}`);
+          this.logger.log(`✓ Using existing Azure Table: ${this.tableName}`);
         } else {
-          console.error('✗ Failed to initialize Azure Table Storage:', error);
+          this.logger.error('✗ Failed to initialize Azure Table Storage:', error);
           this.tableClient = null;
         }
       }
@@ -90,7 +93,7 @@ class AzureTableOrderTrackerService {
     const trackingId = `${order.chatId}-${order.userId}-${Date.now()}`;
 
     if (!this.tableClient) {
-      console.error('⚠️  Azure Table Storage not available - order not persisted');
+      this.logger.error('⚠️  Azure Table Storage not available - order not persisted');
       return trackingId;
     }
 
@@ -109,14 +112,14 @@ class AzureTableOrderTrackerService {
 
       await this.tableClient.createEntity(entity);
 
-      console.log(`📝 Tracking new order: ${trackingId}`);
-      console.log(`   Chat: ${order.chatId}, User: ${order.userId}`);
-      console.log(`   Sent to: ${order.emailSentTo}`);
-      console.log(`   📊 Persisted to Azure Table Storage`);
+      this.logger.log(`📝 Tracking new order: ${trackingId}`);
+      this.logger.log(`   Chat: ${order.chatId}, User: ${order.userId}`);
+      this.logger.log(`   Sent to: ${order.emailSentTo}`);
+      this.logger.log(`   📊 Persisted to Azure Table Storage`);
 
       return trackingId;
     } catch (error) {
-      console.error('Error adding order to Azure Table:', error);
+      this.logger.error('Error adding order to Azure Table:', error);
       throw error;
     }
   }
@@ -130,7 +133,7 @@ class AzureTableOrderTrackerService {
     const orders = new Map<string, PendingOrder>();
 
     if (!this.tableClient) {
-      console.error('⚠️  Azure Table Storage not available');
+      this.logger.error('⚠️  Azure Table Storage not available');
       return orders;
     }
 
@@ -154,7 +157,7 @@ class AzureTableOrderTrackerService {
 
       return orders;
     } catch (error) {
-      console.error('Error fetching orders from Azure Table:', error);
+      this.logger.error('Error fetching orders from Azure Table:', error);
       return orders;
     }
   }
@@ -193,7 +196,7 @@ class AzureTableOrderTrackerService {
       if (error?.statusCode === 404) {
         return undefined;
       }
-      console.error('Error fetching order from Azure Table:', error);
+      this.logger.error('Error fetching order from Azure Table:', error);
       return undefined;
     }
   }
@@ -214,10 +217,10 @@ class AzureTableOrderTrackerService {
       const userId = parts[1];
 
       await this.tableClient.deleteEntity(userId, trackingId);
-      console.log(`✅ Completing order: ${trackingId}`);
+      this.logger.log(`✅ Completing order: ${trackingId}`);
     } catch (error: any) {
       if (error?.statusCode !== 404) {
-        console.error('Error deleting order from Azure Table:', error);
+        this.logger.error('Error deleting order from Azure Table:', error);
       }
     }
   }
@@ -242,7 +245,7 @@ class AzureTableOrderTrackerService {
 
       return count;
     } catch (error) {
-      console.error('Error counting orders in Azure Table:', error);
+      this.logger.error('Error counting orders in Azure Table:', error);
       return 0;
     }
   }
@@ -270,9 +273,9 @@ class AzureTableOrderTrackerService {
       entity.lastReminderAt = new Date().toISOString();
 
       await this.tableClient.updateEntity(entity, 'Replace');
-      console.log(`🔔 Updated reminder time for order: ${trackingId}`);
+      this.logger.log(`🔔 Updated reminder time for order: ${trackingId}`);
     } catch (error) {
-      console.error('Error updating order in Azure Table:', error);
+      this.logger.error('Error updating order in Azure Table:', error);
     }
   }
 }

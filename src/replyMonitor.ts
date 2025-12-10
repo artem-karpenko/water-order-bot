@@ -2,6 +2,7 @@ import { app, InvocationContext, Timer } from "@azure/functions";
 import { Telegraf } from 'telegraf';
 import { GmailService } from './shared/services/gmailService';
 import { orderTracker } from './shared/services/azureTableOrderTracker';
+import { contextLogger } from './shared/utils/logger';
 
 const BOT_TOKEN = process.env.TELEGRAM_BOT_TOKEN;
 if (!BOT_TOKEN) {
@@ -22,7 +23,8 @@ export async function replyMonitor(
   context.log('Reply monitor triggered at:', new Date().toISOString());
 
   try {
-    const gmailService = new GmailService();
+    const logger = contextLogger(context);
+    const gmailService = new GmailService(logger);
     const pendingOrders = await orderTracker.getPendingOrders();
     const pendingCount = await orderTracker.getPendingCount();
 
@@ -37,6 +39,8 @@ export async function replyMonitor(
 
     for (const [trackingId, order] of pendingOrders.entries()) {
       try {
+        context.log(`🔍 Checking order ${trackingId} - sent to: ${order.emailSentTo}, subject: ${order.emailSubject}, date: ${order.sentAt}`);
+
         // Check for reply from the email recipient
         const reply = await gmailService.checkForReply(
           order.emailSentTo,
@@ -46,6 +50,7 @@ export async function replyMonitor(
 
         if (reply) {
           context.log(`✉️  Reply received for order ${trackingId}!`);
+          context.log(`Reply content: ${reply.body.substring(0, 200)}...`);
 
           // Send notification
           await sendReplyNotification(bot, order.chatId, reply.body, context);
@@ -53,6 +58,7 @@ export async function replyMonitor(
           // Mark as completed
           await orderTracker.completePendingOrder(trackingId);
         } else {
+          context.log(`📭 No reply yet for order ${trackingId}`);
           // Check if reminder should be sent
           await checkAndSendReminder(bot, trackingId, order, context);
         }

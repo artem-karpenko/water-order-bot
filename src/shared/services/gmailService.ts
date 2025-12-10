@@ -1,5 +1,6 @@
 import { gmail_v1 } from '@googleapis/gmail';
 import { OAuth2Client } from 'google-auth-library';
+import { Logger, consoleLogger } from '../utils/logger';
 
 interface EmailData {
   date: string;
@@ -11,8 +12,10 @@ interface EmailData {
 export class GmailService {
   private oauth2Client: OAuth2Client;
   private gmail: gmail_v1.Gmail;
+  private logger: Logger;
 
-  constructor() {
+  constructor(logger: Logger = consoleLogger) {
+    this.logger = logger;
     const clientId = process.env.GMAIL_CLIENT_ID;
     const clientSecret = process.env.GMAIL_CLIENT_SECRET;
     const refreshToken = process.env.GMAIL_REFRESH_TOKEN;
@@ -75,7 +78,7 @@ export class GmailService {
         sender: from,
       };
     } catch (error) {
-      console.error('Error fetching email:', error);
+      this.logger.error('Error fetching email:', error);
       throw error;
     }
   }
@@ -139,10 +142,10 @@ export class GmailService {
       });
 
       const messageId = response.data.id || '';
-      console.log(`Email sent successfully to ${to} (ID: ${messageId})`);
+      this.logger.log(`Email sent successfully to ${to} (ID: ${messageId})`);
       return messageId;
     } catch (error) {
-      console.error('Error sending email:', error);
+      this.logger.error('Error sending email:', error);
       throw error;
     }
   }
@@ -159,9 +162,9 @@ export class GmailService {
           removeLabelIds: ['INBOX'],
         },
       });
-      console.log(`Email archived successfully (ID: ${messageId})`);
+      this.logger.log(`Email archived successfully (ID: ${messageId})`);
     } catch (error) {
-      console.error('Error archiving email:', error);
+      this.logger.error('Error archiving email:', error);
       throw error;
     }
   }
@@ -205,7 +208,7 @@ export class GmailService {
       const body = this.extractBody(message.data.payload);
 
       // Archive the email after reading it
-      console.log(`Archiving reply email (ID: ${messageId})`);
+      this.logger.log(`Archiving reply email (ID: ${messageId})`);
       await this.archiveEmail(messageId);
 
       return {
@@ -215,7 +218,7 @@ export class GmailService {
         sender: from,
       };
     } catch (error) {
-      console.error('Error checking for reply:', error);
+      this.logger.error('Error checking for reply:', error);
       return null;
     }
   }
