@@ -164,8 +164,9 @@ export class GmailService {
       });
       this.logger.log(`Email archived successfully (ID: ${messageId})`);
     } catch (error) {
-      this.logger.error('Error archiving email:', error);
-      throw error;
+      // Log error but don't throw - archiving failure shouldn't break reply processing
+      this.logger.error(`Failed to archive email (ID: ${messageId}):`, error);
+      this.logger.warn('Continuing execution despite archive failure');
     }
   }
 
