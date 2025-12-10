@@ -52,10 +52,15 @@ export async function replyMonitor(
           context.log(`✉️  Reply received for order ${trackingId}!`);
           context.log(`Reply content: ${reply.body.substring(0, 200)}...`);
 
-          // Send notification
-          await sendReplyNotification(bot, order.chatId, reply.body, context);
+          // Send notification (but don't let failure prevent order completion)
+          try {
+            await sendReplyNotification(bot, order.chatId, reply.body, context);
+          } catch (error) {
+            context.error(`Failed to send notification for order ${trackingId}:`, error);
+            context.warn('Order will still be marked as completed despite notification failure');
+          }
 
-          // Mark as completed
+          // Mark as completed (always execute, even if notification failed)
           await orderTracker.completePendingOrder(trackingId);
         } else {
           context.log(`📭 No reply yet for order ${trackingId}`);
@@ -97,6 +102,7 @@ async function sendReplyNotification(
     context.log(`✅ Notification sent to chat ${chatId}`);
   } catch (error) {
     context.error(`Error sending notification to chat ${chatId}:`, error);
+    // Re-throw to let caller decide how to handle
     throw error;
   }
 }
