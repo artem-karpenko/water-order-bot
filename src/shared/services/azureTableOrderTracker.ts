@@ -89,8 +89,8 @@ class AzureTableOrderTrackerService {
   async addPendingOrder(order: PendingOrder): Promise<string> {
     await this.initialize();
 
-    // Generate unique tracking ID
-    const trackingId = `${order.chatId}-${order.userId}-${Date.now()}`;
+    // Generate unique tracking ID (use underscore to avoid conflicts with negative chatIds)
+    const trackingId = `${order.chatId}_${order.userId}_${Date.now()}`;
 
     if (!this.tableClient) {
       this.logger.error('⚠️  Azure Table Storage not available - order not persisted');
@@ -173,8 +173,8 @@ class AzureTableOrderTrackerService {
     }
 
     try {
-      // Extract userId from tracking ID (format: chatId-userId-timestamp)
-      const parts = trackingId.split('-');
+      // Extract userId from tracking ID (format: chatId_userId_timestamp)
+      const parts = trackingId.split('_');
       const userId = parts[1];
 
       const entity = await this.tableClient.getEntity<OrderEntity>(
@@ -212,8 +212,8 @@ class AzureTableOrderTrackerService {
     }
 
     try {
-      // Extract userId from tracking ID
-      const parts = trackingId.split('-');
+      // Extract userId from tracking ID (format: chatId_userId_timestamp)
+      const parts = trackingId.split('_');
       const userId = parts[1];
 
       await this.tableClient.deleteEntity(userId, trackingId);
@@ -261,8 +261,8 @@ class AzureTableOrderTrackerService {
     }
 
     try {
-      // Extract userId from tracking ID
-      const parts = trackingId.split('-');
+      // Extract userId from tracking ID (format: chatId_userId_timestamp)
+      const parts = trackingId.split('_');
       const userId = parts[1];
 
       const entity = await this.tableClient.getEntity<OrderEntity>(

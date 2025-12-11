@@ -2,7 +2,10 @@
   "permissions": {
     "allow": [
       "Bash(az --% functionapp config set:*)",
-      "Bash(npm run deploy:prod:*)"
+      "Bash(npm run deploy:prod:*)",
+      "Bash(npm run build:*)",
+      "Bash(git add:*)",
+      "Bash(git commit:*)"
     ],
     "deny": [],
     "ask": []
