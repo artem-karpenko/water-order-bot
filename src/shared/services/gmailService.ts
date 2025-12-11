@@ -180,9 +180,10 @@ export class GmailService {
       const dateStr = afterDate.toISOString().split('T')[0].replace(/-/g, '/');
 
       // Search for emails from sender with subject containing our order subject, after the order date
+      // Only check inbox to avoid archived/trashed emails
       const response = await this.gmail.users.messages.list({
         userId: 'me',
-        q: `from:${senderEmail} subject:"${subjectContains}" after:${dateStr}`,
+        q: `from:${senderEmail} subject:"${subjectContains}" after:${dateStr} in:inbox`,
         maxResults: 5, // Get last 5 to find the latest reply
       });
 
