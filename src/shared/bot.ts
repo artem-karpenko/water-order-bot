@@ -154,7 +154,12 @@ bot.action('action_read_email', async (ctx) => {
       `📝 *Subject:* ${email.subject}\n\n` +
       `*Body:*\n${truncatedBody}`;
 
-    await ctx.reply(formattedMessage, { parse_mode: 'Markdown' });
+    const keyboard = Markup.inlineKeyboard([
+      [Markup.button.callback('💧 Order water', 'action_order_water')],
+      [Markup.button.callback('📧 Read latest email', 'action_read_email')]
+    ]);
+
+    await ctx.reply(formattedMessage, { parse_mode: 'Markdown', ...keyboard });
   } catch (error) {
     currentLogger.error('Error reading email:', error);
     await ctx.answerCbQuery('Failed to fetch email');

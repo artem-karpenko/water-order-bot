@@ -1,5 +1,5 @@
 import { app, InvocationContext, Timer } from "@azure/functions";
-import { Telegraf } from 'telegraf';
+import { Telegraf, Markup } from 'telegraf';
 import { GmailService } from './shared/services/gmailService';
 import { orderTracker } from './shared/services/azureTableOrderTracker';
 import { contextLogger } from './shared/utils/logger';
@@ -102,7 +102,12 @@ async function sendReplyNotification(
       `You have a new reply to your water delivery order:\n\n` +
       `${truncatedReply}`;
 
-    await bot.telegram.sendMessage(chatId, message, { parse_mode: 'Markdown' });
+    const keyboard = Markup.inlineKeyboard([
+      [Markup.button.callback('💧 Order water', 'action_order_water')],
+      [Markup.button.callback('📧 Read latest email', 'action_read_email')]
+    ]);
+
+    await bot.telegram.sendMessage(chatId, message, { parse_mode: 'Markdown', ...keyboard });
     context.log(`✅ Notification sent to chat ${chatId}`);
   } catch (error) {
     context.error(`Error sending notification to chat ${chatId}:`, error);
