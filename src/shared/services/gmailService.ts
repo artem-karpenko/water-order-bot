@@ -1,5 +1,6 @@
 import { gmail_v1 } from '@googleapis/gmail';
 import { OAuth2Client } from 'google-auth-library';
+import { Logger, consoleLogger } from '../utils/logger';
 
 interface EmailData {
   date: string;
@@ -11,8 +12,10 @@ interface EmailData {
 export class GmailService {
   private oauth2Client: OAuth2Client;
   private gmail: gmail_v1.Gmail;
+  private logger: Logger;
 
-  constructor() {
+  constructor(logger: Logger = consoleLogger) {
+    this.logger = logger;
     const clientId = process.env.GMAIL_CLIENT_ID;
     const clientSecret = process.env.GMAIL_CLIENT_SECRET;
     const refreshToken = process.env.GMAIL_REFRESH_TOKEN;
@@ -75,7 +78,7 @@ export class GmailService {
         sender: from,
       };
     } catch (error) {
-      console.error('Error fetching email:', error);
+      this.logger.error('Error fetching email:', error);
       throw error;
     }
   }
@@ -139,17 +142,37 @@ export class GmailService {
       });
 
       const messageId = response.data.id || '';
-      console.log(`Email sent successfully to ${to} (ID: ${messageId})`);
+      this.logger.log(`Email sent successfully to ${to} (ID: ${messageId})`);
       return messageId;
     } catch (error) {
-      console.error('Error sending email:', error);
+      this.logger.error('Error sending email:', error);
       throw error;
     }
   }
 
   /**
+   * Archive an email by removing the INBOX label
+   */
+  async archiveEmail(messageId: string): Promise<void> {
+    try {
+      await this.gmail.users.messages.modify({
+        userId: 'me',
+        id: messageId,
+        requestBody: {
+          removeLabelIds: ['INBOX'],
+        },
+      });
+      this.logger.log(`Email archived successfully (ID: ${messageId})`);
+    } catch (error) {
+      // Log error but don't throw - archiving failure shouldn't break reply processing
+      this.logger.error(`Failed to archive email (ID: ${messageId}):`, error);
+      this.logger.warn('Continuing execution despite archive failure');
+    }
+  }
+
+  /**
    * Check for replies to emails with a specific subject
-   * Returns the latest reply if found
+   * Returns the latest reply if found and archives it
    */
   async checkForReply(senderEmail: string, subjectContains: string, afterDate: Date): Promise<EmailData | null> {
     try {
@@ -185,6 +208,10 @@ export class GmailService {
       // Extract body
       const body = this.extractBody(message.data.payload);
 
+      // Archive the email after reading it
+      this.logger.log(`Archiving reply email (ID: ${messageId})`);
+      await this.archiveEmail(messageId);
+
       return {
         date: dateHeader,
         subject,
@@ -192,7 +219,7 @@ export class GmailService {
         sender: from,
       };
     } catch (error) {
-      console.error('Error checking for reply:', error);
+      this.logger.error('Error checking for reply:', error);
       return null;
     }
   }
