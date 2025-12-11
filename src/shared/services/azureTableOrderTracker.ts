@@ -258,6 +258,45 @@ class AzureTableOrderTrackerService {
   }
 
   /**
+   * Check if there's a pending order for a specific user in a specific chat
+   */
+  async hasPendingOrder(chatId: number, userId: number): Promise<PendingOrder | null> {
+    await this.initialize();
+
+    if (!this.tableClient) {
+      return null;
+    }
+
+    try {
+      // Query orders for this user (partition key is userId)
+      const entities = this.tableClient.listEntities<OrderEntity>({
+        queryOptions: { filter: `PartitionKey eq '${userId}'` }
+      });
+
+      // Check if any of the user's orders are for this chat
+      for await (const entity of entities) {
+        if (entity.chatId === chatId) {
+          return {
+            chatId: entity.chatId,
+            userId: entity.userId,
+            messageId: entity.messageId,
+            emailSentTo: entity.emailSentTo,
+            emailSubject: entity.emailSubject,
+            sentAt: new Date(entity.sentAt),
+            emailMessageId: entity.emailMessageId,
+            lastReminderAt: entity.lastReminderAt ? new Date(entity.lastReminderAt) : undefined,
+          };
+        }
+      }
+
+      return null;
+    } catch (error) {
+      this.logger.error('Error checking for pending order:', error);
+      return null;
+    }
+  }
+
+  /**
    * Update the last reminder time for an order
    */
   async updateLastReminder(trackingId: string): Promise<void> {

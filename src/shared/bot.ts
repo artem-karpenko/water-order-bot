@@ -189,6 +189,29 @@ bot.action('confirm_order', async (ctx) => {
   currentLogger.log('='.repeat(50));
 
   try {
+    // Check if there's already a pending order for this user in this chat
+    const existingOrder = await orderTracker.hasPendingOrder(ctx.chat!.id, ctx.from!.id);
+
+    if (existingOrder) {
+      const hoursSinceOrder = (new Date().getTime() - existingOrder.sentAt.getTime()) / (1000 * 60 * 60);
+      const timeAgo = hoursSinceOrder < 1
+        ? `${Math.floor(hoursSinceOrder * 60)} minutes ago`
+        : `${Math.floor(hoursSinceOrder)} hours ago`;
+
+      await ctx.answerCbQuery('You already have a pending order');
+      await ctx.editMessageText(
+        `⏳ *Pending Order*\n\n` +
+        `You already have an order waiting for reply.\n\n` +
+        `📅 *Sent:* ${timeAgo}\n` +
+        `📧 *To:* ${existingOrder.emailSentTo}\n\n` +
+        `Please wait for a response before ordering again.`,
+        { parse_mode: 'Markdown' }
+      );
+
+      currentLogger.log(`Order rejected - pending order exists (sent ${timeAgo})`);
+      return;
+    }
+
     const { GmailService } = await import('./services/gmailService');
     const recipientEmail = process.env.EMAIL_SENDER_FILTER;
     const emailSubject = process.env.EMAIL_ORDER_SUBJECT || 'Water Delivery Order';
