@@ -107,10 +107,7 @@ async function sendReplyNotification(
       [Markup.button.callback('📧 Read latest email', 'action_read_email')]
     ]);
 
-    await bot.telegram.sendMessage(chatId, message, {
-      parse_mode: 'Markdown',
-      reply_markup: keyboard.reply_markup
-    });
+    await bot.telegram.sendMessage(chatId, message, { parse_mode: 'Markdown', ...keyboard });
     context.log(`✅ Notification sent to chat ${chatId}`);
   } catch (error) {
     context.error(`Error sending notification to chat ${chatId}:`, error);
