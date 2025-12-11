@@ -73,19 +73,19 @@ bot.command('start', async (ctx) => {
   currentLogger.log(`Name: ${user?.first_name} ${user?.last_name || ''}`);
   currentLogger.log('='.repeat(50));
 
-  const keyboard = Markup.keyboard([
-    [Markup.button.text('Order water')],
-    [Markup.button.text('Read latest email')]
-  ]).resize();
+  const keyboard = Markup.inlineKeyboard([
+    [Markup.button.callback('💧 Order water', 'action_order_water')],
+    [Markup.button.callback('📧 Read latest email', 'action_read_email')]
+  ]);
 
   await ctx.reply(
-    'This bot can order water delivery for you',
+    'This bot can order water delivery for you.\n\nChoose an action:',
     keyboard
   );
 });
 
-// Handle "Order water" button
-bot.hears('Order water', async (ctx) => {
+// Handle "Order water" inline button
+bot.action('action_order_water', async (ctx) => {
   const user = ctx.from;
   currentLogger.log('='.repeat(50));
   currentLogger.log('User interaction: Order water button');
@@ -104,10 +104,13 @@ bot.hears('Order water', async (ctx) => {
       ]
     ])
   );
+
+  // Answer the callback query to remove loading state
+  await ctx.answerCbQuery();
 });
 
-// Handle "Read latest email" button
-bot.hears('Read latest email', async (ctx) => {
+// Handle "Read latest email" inline button
+bot.action('action_read_email', async (ctx) => {
   const user = ctx.from;
   currentLogger.log('='.repeat(50));
   currentLogger.log('User interaction: Read latest email button');
@@ -121,12 +124,14 @@ bot.hears('Read latest email', async (ctx) => {
     const senderEmail = process.env.EMAIL_SENDER_FILTER;
 
     if (!senderEmail) {
+      await ctx.answerCbQuery('Error: EMAIL_SENDER_FILTER not configured');
       await ctx.reply('Error: EMAIL_SENDER_FILTER not configured');
       return;
     }
 
     currentLogger.log(`Querying emails from: ${senderEmail}`);
-    await ctx.reply('Fetching latest email...');
+    // Show loading message via callback query answer
+    await ctx.answerCbQuery('Fetching latest email...');
 
     const gmailService = new GmailService();
     const email = await gmailService.getLatestEmailFromSender(senderEmail);
@@ -152,6 +157,7 @@ bot.hears('Read latest email', async (ctx) => {
     await ctx.reply(formattedMessage, { parse_mode: 'Markdown' });
   } catch (error) {
     currentLogger.error('Error reading email:', error);
+    await ctx.answerCbQuery('Failed to fetch email');
     await ctx.reply('Failed to fetch email. Please check the logs for details.');
   }
 });
