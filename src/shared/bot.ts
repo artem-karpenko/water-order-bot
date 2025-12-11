@@ -18,6 +18,8 @@ let currentLogger: Logger = consoleLogger;
 
 export function setLogger(logger: Logger) {
   currentLogger = logger;
+  // Also inject logger into orderTracker singleton
+  orderTracker.setLogger(logger);
 }
 
 currentLogger.log(`Whitelisted user IDs: ${WHITELISTED_USER_IDS.join(', ') || 'None (all users DENIED)'}`);

@@ -40,6 +40,13 @@ class AzureTableOrderTrackerService {
   }
 
   /**
+   * Set logger for the service (useful for singleton instances)
+   */
+  setLogger(logger: Logger): void {
+    this.logger = logger;
+  }
+
+  /**
    * Initialize the table client
    */
   private async initialize(): Promise<void> {

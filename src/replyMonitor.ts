@@ -25,6 +25,10 @@ export async function replyMonitor(
   try {
     const logger = contextLogger(context);
     const gmailService = new GmailService(logger);
+
+    // Inject context logger into singleton orderTracker
+    orderTracker.setLogger(logger);
+
     const pendingOrders = await orderTracker.getPendingOrders();
     const pendingCount = await orderTracker.getPendingCount();
 
